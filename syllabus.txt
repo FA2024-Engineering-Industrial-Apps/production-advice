@@ -1,0 +1,20 @@
+Python Syllabus: 
+
+- conda for virtual environments
+- git: clone, commit, pull, push, merging 
+- functions, classes -> return bahaviour 
+- looping
+- data formats: list, dict, json 
+- repa, str, dir
+- iphython 
+- 
+- 
+- llm   
+    - encoder-decoder structure 
+        - tokens, IDs, attention window, embeddings
+        - 
+    - fine tuning 
+        - system promt, few shot vs. retraining vs. RAG
+    - 
+
+- pyhton behaviours like main 

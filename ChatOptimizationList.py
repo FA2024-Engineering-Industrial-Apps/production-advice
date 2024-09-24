@@ -11,20 +11,21 @@ def Text2Csv(text):
     return 'not yet implemented'
 
 @tool
-def CallOptimizer(NumberOfPCBs: int):
-    """Function to optimize the grouping of PCBs for the production line
-    Args: NumberOfPCBs: The total amount of PCBs to be optimized
+def CallOptimizer(PCB_list: list):
+    """
+    Function to optimize the grouping of PCBs for the production line
+    Args: PCB_list: List of PCB to be optimized
     
     """
-    json_data = call(NumberOfPCBs)
-    return json_data
+    #json_data = call(PCB_list)
+    return PCB_list
 
 tools = [CallOptimizer, Text2Csv]
 
 
 
 llm = ChatOllama(model="llama3-groq-tool-use", temperature=0).bind_tools(tools) #8B
-query = "Please optimize the PCB grouping for PCB 1-3"
+query = "Please optimize the PCB grouping for the PCBs 4 8 and also 10 and 12"
 
 
 #test_queries = "I have to optimize the PCB for  "
@@ -43,9 +44,9 @@ selected_tool = tool_mapping[tool_calls[0]['name']] # used to get the selected t
 tool_output = selected_tool.invoke(tool_calls[0]['args']) # invoke the selected tool with the argument
 print(tool_output)
 
-PCB_grouping = [{'group_id': group['group_id'], 'PCBs': ', '.join(group['PCBs'])} for group in tool_output['groups']]
+#PCB_grouping = [{'group_id': group['group_id'], 'PCBs': ', '.join(group['PCBs'])} for group in tool_output['groups']]
 
 
-df = pd.DataFrame(PCB_grouping)
+#df = pd.DataFrame(PCB_grouping)
 
-print(df)
+#print(df)
