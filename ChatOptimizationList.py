@@ -1,6 +1,7 @@
 from langchain_core.tools import tool
 from langchain_ollama import ChatOllama
 from BruteForcing_Serial_func import call, call_list
+from langchain_core.messages import HumanMessage, SystemMessage
 import pandas as pd
 
 
@@ -23,11 +24,14 @@ tools = [CallOptimizer, Text2Csv]
 
 
 
-llm = ChatOllama(model="llama3-groq-tool-use", temperature=0).bind_tools(tools) #8B
-query = "Please optimize the PCB grouping for the PCBs 4 8 and also 10"
-query2 = "I have to optimize the PCBs 1-5"
+llm = ChatOllama(model="llama3-groq-tool-use", temperature=0, seed=0).bind_tools(tools) #8B
 
-result = llm.invoke(query2)
+query = "Please optimize the PCB grouping for the PCBs 4 8 and also 10"
+message = [HumanMessage(query), SystemMessage('You are a helpful assitantant.')]
+query2 = "I have to optimize the PCBs 1-5"
+query3 = 'please optimize the PCB grouping for PCBs 1 3 5 7'
+
+result = llm.invoke(query3)
 print(result)
 print('\n')
 tool_calls = result.tool_calls
