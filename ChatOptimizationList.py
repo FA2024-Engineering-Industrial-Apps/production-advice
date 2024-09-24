@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 from langchain_ollama import ChatOllama
-from BruteForcing_Serial_func import call
+from BruteForcing_Serial_func import call, call_list
 import pandas as pd
 
 
@@ -16,8 +16,8 @@ def CallOptimizer(NumberOfPCBs):
     Function to optimize the grouping of PCBs for the production line
     Args: NumberOfPCBs: this should either be a a list of PCBs or a single int for a range of PCBs.
     """
-    #json_data = call(PCB_list)
-    return NumberOfPCBs
+    json_data = call_list(NumberOfPCBs)
+    return json_data
 
 tools = [CallOptimizer, Text2Csv]
 
@@ -41,9 +41,9 @@ selected_tool = tool_mapping[tool_calls[0]['name']] # used to get the selected t
 tool_output = selected_tool.invoke(tool_calls[0]['args']) # invoke the selected tool with the argument
 print(tool_output)
 
-#PCB_grouping = [{'group_id': group['group_id'], 'PCBs': ', '.join(group['PCBs'])} for group in tool_output['groups']]
+PCB_grouping = [{'group_id': group['group_id'], 'PCBs': ', '.join(group['PCBs'])} for group in tool_output['groups']]
 
 
-#df = pd.DataFrame(PCB_grouping)
+df = pd.DataFrame(PCB_grouping)
 
-#print(df)
+print(df)
