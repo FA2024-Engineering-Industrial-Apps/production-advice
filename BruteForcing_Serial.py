@@ -169,8 +169,8 @@ if __name__ == "__main__":
         if len(combination) < min_comb_len:    # if the current combination has fewer groups than the previously found minimum, update the minimum and clear the best_combinations list
             min_comb_len = len(combination)
             best_combinations.clear()          # less efficient combinations ( combinations with larger number of groups are deleted )
-    if len(combination) == min_comb_len:    # if the current combination has the same number of groups as the minimum, add it to the best_combinations list
-        best_combinations.append(combination)
+        if len(combination) == min_comb_len:    # if the current combination has the same number of groups as the minimum, add it to the best_combinations list
+            best_combinations.append(combination)
 # -----------------------------------------------------
 # Measuring runtime
     end_time = time.time()

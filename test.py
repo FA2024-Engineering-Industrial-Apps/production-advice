@@ -1,3 +1,3 @@
-import BruteForcing_Serial
+from BruteForcing_Serial_func import call_list
 
-print(BruteForcing_Serial.call(4))
+print(call_list([1, 2, 3, 4, 5]))
