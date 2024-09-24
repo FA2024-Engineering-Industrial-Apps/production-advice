@@ -28,25 +28,27 @@ llm = ChatOllama(
     temperature=0,
     seed=0
 ).bind_tools(tools) #8B
-query = "Please optimize the PCB grouping for PCB 1-3"
 
-result = llm.invoke(query)
-print(result)
-print('\n')
-tool_calls = result.tool_calls
-print(tool_calls)
-print('\n')
+if __name__ == "__main__":
+    query = "Please optimize the PCB grouping for PCB 1-3"
+    
+    result = llm.invoke(query)
+    print(result)
+    print('\n')
+    tool_calls = result.tool_calls
+    print(tool_calls)
+    print('\n')
 
-tool_mapping = {'CallOptimizer':CallOptimizer, 'Text2Csv': Text2Csv} # mapping between tool name and defined tool function
-
-
-selected_tool = tool_mapping[tool_calls[0]['name']] # used to get the selected tool
-tool_output = selected_tool.invoke(tool_calls[0]['args']) # invoke the selected tool with the argument
-print(tool_output)
-
-PCB_grouping = [{'group_id': group['group_id'], 'PCBs': ', '.join(group['PCBs'])} for group in tool_output['groups']]
+    tool_mapping = {'CallOptimizer':CallOptimizer, 'Text2Csv': Text2Csv} # mapping between tool name and defined tool function
 
 
-df = pd.DataFrame(PCB_grouping)
+    selected_tool = tool_mapping[tool_calls[0]['name']] # used to get the selected tool
+    tool_output = selected_tool.invoke(tool_calls[0]['args']) # invoke the selected tool with the argument
+    print(tool_output)
 
-print(df)
+    PCB_grouping = [{'group_id': group['group_id'], 'PCBs': ', '.join(group['PCBs'])} for group in tool_output['groups']]
+
+
+    df = pd.DataFrame(PCB_grouping)
+
+    print(df)

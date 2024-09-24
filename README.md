@@ -1,3 +1,7 @@
+# Running streamlit
+
+`python -m streamlit run .\main.py`
+
 # Some guides
 
 ## Installing Ollama
