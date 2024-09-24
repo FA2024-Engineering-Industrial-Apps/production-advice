@@ -11,26 +11,23 @@ def Text2Csv(text):
     return 'not yet implemented'
 
 @tool
-def CallOptimizer(PCB_list: list):
+def CallOptimizer(NumberOfPCBs):
     """
     Function to optimize the grouping of PCBs for the production line
-    Args: PCB_list: List of PCB to be optimized
-    
+    Args: NumberOfPCBs: this should either be a a list of PCBs or a single int for a range of PCBs.
     """
     #json_data = call(PCB_list)
-    return PCB_list
+    return NumberOfPCBs
 
 tools = [CallOptimizer, Text2Csv]
 
 
 
 llm = ChatOllama(model="llama3-groq-tool-use", temperature=0).bind_tools(tools) #8B
-query = "Please optimize the PCB grouping for the PCBs 4 8 and also 10 and 12"
+query = "Please optimize the PCB grouping for the PCBs 4 8 and also 10"
+query2 = "I have to optimize the PCBs 1-5"
 
-
-#test_queries = "I have to optimize the PCB for  "
-
-result = llm.invoke(query)
+result = llm.invoke(query2)
 print(result)
 print('\n')
 tool_calls = result.tool_calls
