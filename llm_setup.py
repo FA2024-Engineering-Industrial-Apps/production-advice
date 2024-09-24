@@ -32,7 +32,8 @@ prompt = ChatPromptTemplate.from_messages(
 model = ChatOllama(
     model="llama3-groq-tool-use",
     temperature=0,
-    seed=0
+    seed=0,
+    base_url="workstation.ferienakademie.de"
 )
 tools = [CallOptimizer, Text2Csv]
 agent = create_tool_calling_agent(model, tools, prompt)
