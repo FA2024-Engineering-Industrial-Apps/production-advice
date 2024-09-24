@@ -1,4 +1,4 @@
-from BruteForcing_Serial_func import call
+from BruteForcing_Serial_func import call_list
 import pandas as pd
 
 from langchain_ollama import ChatOllama
@@ -13,11 +13,11 @@ def Text2Csv(text):
 
 @tool
 def CallOptimizer(NumberOfPCBs):
-    """Function to optimize the grouping of PCBs for the production line
-    Args: NumberOfPCBs: The total amount of PCBs to be optimized
-    
     """
-    json_data = call(NumberOfPCBs)
+    Function to optimize the grouping of PCBs for the production line
+    Args: NumberOfPCBs: this should either be a a list of PCBs or a single int for a range of PCBs.
+    """
+    json_data = call_list(NumberOfPCBs)
     return json_data
 
 
