@@ -15,7 +15,7 @@ def GetTraffic(location):
 tools = [GetWeather, GetTraffic]
 
 llm = ChatOllama(model="llama3-groq-tool-use", temperature=0).bind_tools(tools) #8B
-query = "Whats the weather in Berlin?"
+query = "Whats the weather in Munich?"
 
 result = llm.invoke(query)
 print(result)
