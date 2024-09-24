@@ -23,7 +23,11 @@ tools = [CallOptimizer, Text2Csv]
 
 
 
-llm = ChatOllama(model="llama3-groq-tool-use", temperature=0).bind_tools(tools) #8B
+llm = ChatOllama(
+    model="llama3-groq-tool-use",
+    temperature=0,
+    seed=0
+).bind_tools(tools) #8B
 query = "Please optimize the PCB grouping for PCB 1-3"
 
 result = llm.invoke(query)
