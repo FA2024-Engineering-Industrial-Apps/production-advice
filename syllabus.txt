@@ -2,7 +2,7 @@ Python Syllabus:
 
 - conda for virtual environments
 - git: clone, commit, pull, push, merging 
-- functions, classes -> return bahaviour 
+- functions, classes (OOP in general) -> return bahaviour 
 - looping
 - data formats: list, dict, json 
 - repa, str, dir
