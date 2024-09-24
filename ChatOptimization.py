@@ -5,7 +5,7 @@ from langchain_core.tools import tool
 from langchain_ollama import ChatOllama
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage
 
 from typing import Iterable, Any
 
@@ -39,16 +39,6 @@ llm = ChatOllama(
     temperature=0,
     seed=0
 ).bind_tools(tools) #8B
-
-runnable_with_history = RunnableWithMessageHistory(
-    llm, get_session_history
-)
-
-def get_llm_answer(query: str, session_id: int) -> Iterable[Any]:
-    return runnable_with_history.stream(
-        [HumanMessage(content=query)],
-        config={"configurable": {"session_id": str(session_id)}}
-    )
 
 if __name__ == "__main__":
     query = "Please optimize the PCB grouping for PCB 1-3"
