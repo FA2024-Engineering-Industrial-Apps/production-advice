@@ -1,10 +1,9 @@
 from BruteForcing_Serial_func import call
 import pandas as pd
 
-from langchain_core.tools import tool
 from langchain_ollama import ChatOllama
-from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain.agents import AgentExecutor, create_tool_calling_agent, tool
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
 
 from typing import Iterable, Any
@@ -23,22 +22,23 @@ def CallOptimizer(NumberOfPCBs):
     json_data = call(NumberOfPCBs)
     return json_data
 
-tools = [CallOptimizer, Text2Csv]
 
-
-history_dict = dict()
-def get_session_history(session_id):
-    if session_id in history_dict:
-        return history_dict[session_id]
-    history_dict[session_id] = ChatMessageHistory()
-    return history_dict[session_id]
-
-
-llm = ChatOllama(
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You are a helpful assistant"),
+        ("placeholder", "{chat_history}"),
+        ("human", "{input}"),
+        ("placeholder", "{agent_scratchpad}"),
+    ]
+)
+model = ChatOllama(
     model="llama3-groq-tool-use",
     temperature=0,
     seed=0
-).bind_tools(tools) #8B
+)
+tools = [CallOptimizer, Text2Csv]
+agent = create_tool_calling_agent(model, tools, prompt)
+agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
 if __name__ == "__main__":
     query = "Please optimize the PCB grouping for PCB 1-3"
