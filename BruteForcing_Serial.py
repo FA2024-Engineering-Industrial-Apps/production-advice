@@ -8,9 +8,6 @@ import time
 import psutil
 import os
 import sys
-import json
-
-    
 def is_valid_group(group, pcb_data_dict, material_catalogue_dict, C_max):
     '''
     This function checks if a group of PCBs is valid based on their total required slot width.
@@ -82,27 +79,8 @@ def generate_combinations(pcbs, pcb_data_dict, material_catalogue_dict, C_max, c
             yield combination
 
 
-def create_json_data(best_combinations, pcb_data_dict):
-    json_data = {"groups": []}
-    # Loop through each group in best_combinations
-    for group_id, group in enumerate(best_combinations[0], start=1):
-        group_pcbs = []
-        group_materials = set()  # Use a set to avoid duplicate materials
-        # Collect PCBs and their materials from the current group
-        for pcb_group in group:
-            if pcb_group in pcb_data_dict:
-                group_pcbs.append(pcb_group)
-                group_materials.update(pcb_data_dict[pcb_group])
 
-        # Add the group information to the JSON structure
-        json_data["groups"].append({
-            "group_id": group_id,
-            "PCBs": group_pcbs,
-            "materials": list(group_materials)  # Convert set to list
-        })
 
-    # Return the JSON data as a Python dictionary
-    return json_data
 
 def write_results(best_combinations, pcb_list, pcb_data_dict, material_catalogue_dict, C_max, dataset_path,execution_time):
     """
@@ -155,8 +133,18 @@ def write_results(best_combinations, pcb_list, pcb_data_dict, material_catalogue
                     file.write(f"{material} ")
                 file.write("\n")
             file.write("\n")
-            
-def call(number_of_data):
+
+# -----------------------------------------------------
+if __name__ == "__main__":
+
+    number_of_data = int(sys.argv[1])  # get number_of_data at runtime
+    assert 1 <= number_of_data <= 50, "Error: number_of_data must be between 1 and 50."
+    print(f"number_of_data is valid: {number_of_data}")
+# -----------------------------------------------------
+# Start timing
+    start_time = time.time()
+# -----------------------------------------------------
+# Reading data and initialization
     C_max = 15  # maximum slot size
     dataset_path = "./50_entry_dataset/"  # path to dataset
     material_catalogue_path = f"{dataset_path}Material_catalogue.csv"  # path to csv file of Material_catelogue
@@ -183,50 +171,11 @@ def call(number_of_data):
             best_combinations.clear()          # less efficient combinations ( combinations with larger number of groups are deleted )
     if len(combination) == min_comb_len:    # if the current combination has the same number of groups as the minimum, add it to the best_combinations list
         best_combinations.append(combination)
-
-    return create_json_data(best_combinations, pcb_data_dict)
-# if __name__ == "__main__":
-
-#     number_of_data = int(sys.argv[1])  # get number_of_data at runtime
-#     assert 1 <= number_of_data <= 50, "Error: number_of_data must be between 1 and 50."
-#     print(f"number_of_data is valid: {number_of_data}")
-# # -----------------------------------------------------
-# # Start timing
-#     start_time = time.time()
-# # -----------------------------------------------------
-# # Reading data and initialization
-#     C_max = 15  # maximum slot size
-#     dataset_path = "./50_entry_dataset/"  # path to dataset
-#     material_catalogue_path = f"{dataset_path}Material_catalogue.csv"  # path to csv file of Material_catelogue
-#     material_catalogue = pd.read_csv(material_catalogue_path)  # read csv file of Material_catelogue
-#     material_catalogue = material_catalogue.to_numpy()
-#     material_catalogue = material_catalogue[:, :2]
-#     material_catalogue_dict = {key: value for key, value in
-#                                material_catalogue}  # setup dictonary of materials ( key: Material Index , value: Slot Width ) using Material_catelogue
-#     pcb_data_dict = {}
-#     pcb_files = [f"{dataset_path}PCB{i:03d}.csv" for i in range(1, number_of_data + 1)]
-#     for pcb_number, each_file in enumerate(pcb_files):  # read every PCBs in pcb_files
-#         pcb = pd.read_csv(each_file)
-#         pcb_data_dict[f'PCB{pcb_number + 1:03d}'] = pcb[
-#             "Material Index"].values  # preparing dictionary of PCBs (key: Name of PCB, value: Material Index)
-#     pcb_list = list(pcb_data_dict.keys())  # list of all PCBs
-#     pcb_list = sorted(pcb_list, key=lambda x: sum(material_catalogue_dict[key] for key in pcb_data_dict[x]),reverse=True)  # sorting PCBS basing on their total slot width in descending order
-# # -----------------------------------------------------
-# # Generating Combinations
-#     best_combinations = []        # initialize a list to store the best combinations
-#     min_comb_len = float('inf')   # initialize a variable to store the length of the smallest combination found
-#     for combination in generate_combinations(pcb_list, pcb_data_dict, material_catalogue_dict, C_max):            # iterate over each valid combination generated by the generate_combinations function
-#         if len(combination) < min_comb_len:    # if the current combination has fewer groups than the previously found minimum, update the minimum and clear the best_combinations list
-#             min_comb_len = len(combination)
-#             best_combinations.clear()          # less efficient combinations ( combinations with larger number of groups are deleted )
-#     if len(combination) == min_comb_len:    # if the current combination has the same number of groups as the minimum, add it to the best_combinations list
-#         best_combinations.append(combination)
-# # -----------------------------------------------------
-# # Measuring runtime
-#     end_time = time.time()
-#     execution_time = end_time - start_time
-# # -----------------------------------------------------
-# # Writing the output_file
-#     write_results(best_combinations,pcb_list,pcb_data_dict,material_catalogue_dict, C_max,dataset_path,execution_time)
-#     print(create_json_data(best_combinations, pcb_list, pcb_data_dict))
+# -----------------------------------------------------
+# Measuring runtime
+    end_time = time.time()
+    execution_time = end_time - start_time
+# -----------------------------------------------------
+# Writing the output_file
+    write_results(best_combinations,pcb_list,pcb_data_dict,material_catalogue_dict, C_max,dataset_path,execution_time)
 
