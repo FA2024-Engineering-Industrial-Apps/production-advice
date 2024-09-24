@@ -1,5 +1,0 @@
-- Set up Ollama:
-	.download Ollama @ https://ollama.com/
-	.in your terminal run ‚ollama pull llama3-groq-tool-use‘
-	. in your  terminal run ‚ollama serve‘
-	
