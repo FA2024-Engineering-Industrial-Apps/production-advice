@@ -31,7 +31,7 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 )
 model = ChatOllama(
-    model="llama3-groq-tool-use",
+    model="qwen2.5:32b",
     temperature=0,
     seed=0#,
     # base_url="workstation.ferienakademie.de"
