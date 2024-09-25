@@ -11,6 +11,17 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": ["5"]
+        },
+        {
+            "name": "Python Debugger: Streamlit debug",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "streamlit",
+            "console": "integratedTerminal",
+            "args": [
+                "run",
+                "main.py"
+            ]
         }
     ]
 }
