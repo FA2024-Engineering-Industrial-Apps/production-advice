@@ -83,23 +83,26 @@ def generate_combinations(pcbs, pcb_data_dict, material_catalogue_dict, C_max, c
 
 
 def create_json_data(best_combinations, pcb_data_dict):
-    json_data = {"groups": []}
-    # Loop through each group in best_combinations
-    for group_id, group in enumerate(best_combinations[0], start=1):
-        group_pcbs = []
-        group_materials = set()  # Use a set to avoid duplicate materials
-        # Collect PCBs and their materials from the current group
-        for pcb_group in group:
-            if pcb_group in pcb_data_dict:
-                group_pcbs.append(pcb_group)
-                group_materials.update(pcb_data_dict[pcb_group])
+    json_data = {"combinations": []}
+    for combination_id, combi in enumerate(best_combinations, start=1):
+        grouping = []
+        # Loop through each group in best_combinations
+        for group_id, group in enumerate(combi, start=1):
+            group_pcbs = []
+            group_materials = set()  # Use a set to avoid duplicate materials
+            # Collect PCBs and their materials from the current group
+            for pcb_group in group:
+                if pcb_group in pcb_data_dict:
+                    group_pcbs.append(pcb_group)
+                    group_materials.update(pcb_data_dict[pcb_group])
 
-        # Add the group information to the JSON structure
-        json_data["groups"].append({
-            "group_id": group_id,
-            "PCBs": group_pcbs,
-            "materials": list(group_materials)  # Convert set to list
-        })
+            # Add the group information to the JSON structure
+            grouping.append({
+                "group_id": group_id,
+                "PCBs": group_pcbs#,
+                #"materials": list(group_materials)  # Convert set to list
+            })
+        json_data["combinations"].append({f"combination{combination_id}": grouping})
 
     # Return the JSON data as a Python dictionary
     return json_data
@@ -196,8 +199,10 @@ def call_list(input_pcb_list) -> json:
     """
     if type(input_pcb_list)==type(1):
         input_pcb_list = [input_pcb_list]
-    assert len(input_pcb_list)>0, "Error: empty input list."
-    assert min(input_pcb_list) >=1 and max(input_pcb_list)<=50, "Error: number_of_data must be between 1 and 50."
+    if len(input_pcb_list)>0: 
+        return {"Error": "empty input list"}
+    if min(input_pcb_list) >=1 and max(input_pcb_list)<=50: 
+        return {"Error": "the input PCBs must be between 1 and 50"}
     C_max = 15  # maximum slot size
     dataset_path = "./50_entry_dataset/"  # path to dataset
     material_catalogue_path = f"{dataset_path}Material_catalogue.csv"  # path to csv file of Material_catelogue
@@ -223,8 +228,8 @@ def call_list(input_pcb_list) -> json:
         if len(combination) < min_comb_len:    # if the current combination has fewer groups than the previously found minimum, update the minimum and clear the best_combinations list
             min_comb_len = len(combination)
             best_combinations.clear()          # less efficient combinations ( combinations with larger number of groups are deleted )
-    if len(combination) == min_comb_len:    # if the current combination has the same number of groups as the minimum, add it to the best_combinations list
-        best_combinations.append(combination)
+        if len(combination) == min_comb_len:    # if the current combination has the same number of groups as the minimum, add it to the best_combinations list
+            best_combinations.append(combination)
 
     return create_json_data(best_combinations, pcb_data_dict)
 # if __name__ == "__main__":
