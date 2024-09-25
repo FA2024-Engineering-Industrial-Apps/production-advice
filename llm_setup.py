@@ -24,6 +24,8 @@ def CallOptimizer(NumberOfPCBs):
 prompt = ChatPromptTemplate.from_messages(
     [
         ("system", "You are a helpful assistant capeable of analyzing large datasets. If you are not capeable of analyzing ask for a preference."),
+        ("system", "If the input is not complete, ask the user for spezification."),
+        ("system", "Don't make pcb combinations up by yourself. Only use the results of the function."),
         ("placeholder", "{chat_history}"),
         ("human", "{input}"),
         ("placeholder", "{agent_scratchpad}"),
@@ -33,8 +35,8 @@ prompt = ChatPromptTemplate.from_messages(
 model = ChatOllama(
     model="qwen2.5:32b",
     temperature=0,
-    seed=0#,
-    # base_url="workstation.ferienakademie.de"
+    seed=0,
+    base_url="workstation.ferienakademie.de"
 )
 tools = [CallOptimizer, Text2Csv]
 agent = create_tool_calling_agent(model, tools, prompt)

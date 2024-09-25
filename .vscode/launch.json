@@ -18,6 +18,7 @@
             "request": "launch",
             "module": "streamlit",
             "console": "integratedTerminal",
+            "justMyCode": false,
             "args": [
                 "run",
                 "main.py"

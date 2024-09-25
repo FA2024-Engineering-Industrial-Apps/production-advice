@@ -199,9 +199,9 @@ def call_list(input_pcb_list) -> json:
     """
     if type(input_pcb_list)==type(1):
         input_pcb_list = [input_pcb_list]
-    if len(input_pcb_list)>0: 
+    if len(input_pcb_list) <= 0: 
         return {"Error": "empty input list"}
-    if min(input_pcb_list) >=1 and max(input_pcb_list)<=50: 
+    if min(input_pcb_list) < 1 or max(input_pcb_list) > 50: 
         return {"Error": "the input PCBs must be between 1 and 50"}
     C_max = 15  # maximum slot size
     dataset_path = "./50_entry_dataset/"  # path to dataset
