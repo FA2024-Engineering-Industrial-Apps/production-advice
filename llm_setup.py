@@ -30,7 +30,7 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 )
 model = ChatOllama(
-    model="llama3-groq-tool-use",
+    model="gemma2:27b",
     temperature=0,
     seed=0,
     base_url="workstation.ferienakademie.de"
@@ -38,3 +38,8 @@ model = ChatOllama(
 tools = [CallOptimizer, Text2Csv]
 agent = create_tool_calling_agent(model, tools, prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+
+if __name__ == "__main__":
+    print(
+        model.invoke("Hello world!")
+    )
