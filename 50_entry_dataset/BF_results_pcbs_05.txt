@@ -1,0 +1,78 @@
+Number of combined PCBs: 5 
+Max Feeder Capacity time: 15
+Execution time: 0.010210037231445312 seconds
+Memory usage: 74.03515625 MB
+CPU Times: User Time = 0.1875 seconds, System Time = 0.109375 seconds
+Number of Threads: 19
+Number of possible combinations that fulfill capacity constraint: 4
+Number of combinations with the least amount of groups: 4
+Number of groups necessary: 3
+ 
+Combination 1 with 3 groups contain:
+
+Group 1 contains PCBs:
+PCB001 PCB003 
+Group 1 contains materials:
+B7F0070144 B7F2407938 B7F8089618 B7F4195039 B7F3130815 B7F5874492 B7F4485055 
+
+Group 2 contains PCBs:
+PCB002 PCB005 
+Group 2 contains materials:
+B7F4491129 B7F6806240 B7F6141801 B7F9293923 B7F2407938 B7F1710243 B7F9449572 B7F0325558 B7F9262402 
+
+Group 3 contains PCBs:
+PCB004 
+Group 3 contains materials:
+B7F4428313 B7F9521762 B7F3340496 
+
+Combination 2 with 3 groups contain:
+
+Group 1 contains PCBs:
+PCB001 
+Group 1 contains materials:
+B7F0070144 B7F2407938 B7F8089618 B7F4195039 B7F3130815 
+
+Group 2 contains PCBs:
+PCB002 PCB005 
+Group 2 contains materials:
+B7F4491129 B7F6806240 B7F6141801 B7F9293923 B7F2407938 B7F1710243 B7F9449572 B7F0325558 B7F9262402 
+
+Group 3 contains PCBs:
+PCB004 PCB003 
+Group 3 contains materials:
+B7F4428313 B7F9521762 B7F3340496 B7F5874492 B7F4485055 
+
+Combination 3 with 3 groups contain:
+
+Group 1 contains PCBs:
+PCB001 PCB003 
+Group 1 contains materials:
+B7F0070144 B7F2407938 B7F8089618 B7F4195039 B7F3130815 B7F5874492 B7F4485055 
+
+Group 2 contains PCBs:
+PCB002 
+Group 2 contains materials:
+B7F4491129 B7F6806240 B7F6141801 B7F9293923 B7F2407938 
+
+Group 3 contains PCBs:
+PCB005 PCB004 
+Group 3 contains materials:
+B7F1710243 B7F6141801 B7F9449572 B7F0325558 B7F9262402 B7F4428313 B7F9521762 B7F3340496 
+
+Combination 4 with 3 groups contain:
+
+Group 1 contains PCBs:
+PCB001 
+Group 1 contains materials:
+B7F0070144 B7F2407938 B7F8089618 B7F4195039 B7F3130815 
+
+Group 2 contains PCBs:
+PCB002 PCB003 
+Group 2 contains materials:
+B7F4491129 B7F6806240 B7F6141801 B7F9293923 B7F2407938 B7F5874492 B7F4485055 
+
+Group 3 contains PCBs:
+PCB005 PCB004 
+Group 3 contains materials:
+B7F1710243 B7F6141801 B7F9449572 B7F0325558 B7F9262402 B7F4428313 B7F9521762 B7F3340496 
+
