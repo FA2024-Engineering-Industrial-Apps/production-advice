@@ -1,5 +1,7 @@
 # Production Advice
 
+PLEASE PROVIDE THE ENDPOINT URL NAME IN `key.txt`.
+
 ## Running the code
 
 ### Locally

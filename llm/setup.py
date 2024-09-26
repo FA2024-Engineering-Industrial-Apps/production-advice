@@ -1,3 +1,6 @@
+import sys, os.path as path
+sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
+
 from algorithms.bruteforce.serial import call_list
 from algorithms.bruteforce.parallel import call_list_parallel
 from algorithms.bruteforce.hybrid import call_list_hybrid
@@ -7,7 +10,6 @@ from langchain_ollama import ChatOllama
 from langchain.agents import AgentExecutor, create_tool_calling_agent, tool
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
-
 
 @tool
 def Text2Csv(text):
@@ -53,17 +55,32 @@ prompt = ChatPromptTemplate.from_messages(
         ("system", "You are not allowed to call more than one optimization function in response to a single prompt."),
         ("placeholder", "{chat_history}"),
         ("human", "{input}"),
-        ("placeholder", "{agent_scratchpad}"),
-        ("system", "I remind you that you can handle datasets of arbitrary size")
+        ("placeholder", "{agent_scratchpad}")
     ]
 )
+
+key_path = "./key.txt"
+if path.isfile(key_path):
+    with open("key.txt", "r") as file:
+        api_endpoint = file.read()
+else:
+    raise RuntimeError("No key.txt provided!")
+
 model = ChatOllama(
-    model="qwen2.5:32b",
+    model="llama3.1:70b",
     temperature=0,
     seed=0,
-    base_url="workstation.ferienakademie.de"
+    base_url=api_endpoint
 )
 
 tools = [CallOptimizer, CallHybridOptimizer, CallParallelOptimizer, Text2Csv]
 agent = create_tool_calling_agent(model, tools, prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+
+if __name__ == "__main__":
+    print(agent_executor.invoke(
+        {
+            "input": "Hello there!",
+            "chat_history": []
+        }
+    ))

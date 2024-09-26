@@ -10,7 +10,8 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["5"]
+            "args": ["5"],
+            "justMyCode": false
         },
         {
             "name": "Python Debugger: Streamlit debug",
