@@ -1,6 +1,12 @@
-# Running streamlit
+# Running
 
+## Locally
 `python -m streamlit run .\main.py`
+
+## Docker
+```docker build -t production .```
+
+```docker run -p 8501:8501 production```
 
 # Some guides
 
