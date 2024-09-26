@@ -50,6 +50,7 @@ prompt = ChatPromptTemplate.from_messages(
         ("system", "You are a helpful assistant capeable of analyzing large datasets. If you are not capeable of analyzing ask for a preference."),
         ("system", "If the input is not complete, ask the user for spezification."),
         ("system", "Don't make pcb combinations up by yourself. Only use the results of the function."),
+        ("system", "You are not allowed to call more than one optimization function in response to a single prompt."),
         ("placeholder", "{chat_history}"),
         ("human", "{input}"),
         ("placeholder", "{agent_scratchpad}"),
