@@ -64,7 +64,28 @@ def generate_combinations(pcbs, pcb_data_dict, material_catalogue_dict, C_max):
                 yield [*other_partition[:i], [first, *other_partition[i]], *other_partition[i+1:]]
         if is_valid_group([first], pcb_data_dict, material_catalogue_dict, C_max):
             yield [[first], *other_partition]
-    
+
+def create_json_data(best_combinations, pcb_data_dict):
+    json_data = {"groups": []}
+    # Loop through each group in best_combinations
+    for group_id, group in enumerate(best_combinations[0], start=1):
+        group_pcbs = []
+        group_materials = set()  # Use a set to avoid duplicate materials
+        # Collect PCBs and their materials from the current group
+        for pcb_group in group:
+            if pcb_group in pcb_data_dict:
+                group_pcbs.append(pcb_group)
+                group_materials.update(pcb_data_dict[pcb_group])
+
+        # Add the group information to the JSON structure
+        json_data["groups"].append({
+            "group_id": group_id,
+            "PCBs": group_pcbs,
+            "materials": list(group_materials)  # Convert set to list
+        })
+
+    # Return the JSON data as a Python dictionary
+    return json_data
 
 def call(pcb_indecies: list[int]):
     C_max = 15  # maximum slot size
