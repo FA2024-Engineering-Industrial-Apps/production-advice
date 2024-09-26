@@ -1,12 +1,13 @@
 name: CI Pipeline
 
+# https://stackoverflow.com/a/68414395/8302811
 on:
   push:
     branches:
-      - $default-branch
+      - ${{ github.event.repository.default_branch }}
   pull_request:
     branches:
-      - $default-branch
+      - ${{ github.event.repository.default_branch }}
 
 jobs:
   static-analysis:
