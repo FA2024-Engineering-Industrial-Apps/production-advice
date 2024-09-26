@@ -1,6 +1,6 @@
 import streamlit as st
-import llm_setup as llmchat
-from streamlit_utils import *
+import llm.setup as llmchat
+from utils.streamlit_utils import *
 
 if __name__ == "__main__":
     @st.cache_resource

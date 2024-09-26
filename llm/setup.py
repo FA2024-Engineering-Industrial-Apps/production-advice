@@ -1,6 +1,6 @@
-from BruteForcing_Serial_func import call_list
-from BruteForcing_Parallel_func import call_list_parallel
-from BruteForcing_Hybrid_func import call_list_hybrid
+from algorithms.bruteforce.serial import call_list
+from algorithms.bruteforce.parallel import call_list_parallel
+from algorithms.bruteforce.hybrid import call_list_hybrid
 import pandas as pd
 
 from langchain_ollama import ChatOllama

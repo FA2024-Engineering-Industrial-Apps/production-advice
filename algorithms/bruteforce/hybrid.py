@@ -128,59 +128,6 @@ def find_first_combination(max_num_group, pcb_list, pcb_data_dict, material_cata
 
     return shared_mingp.value
 
-def write_results(best_combinations, pcb_list, pcb_data_dict, material_catalogue_dict, C_max, dataset_path,execution_time):
-    """
-    This function writes the results of PCB combinations to a text file,
-    and prints process information including execution time, memory usage, CPU times, and number of threads.
-
-    :param best_combinations: List of best combinations of PCBs.
-    :param pcbs: List of PCB identifiers to be grouped.
-    :param pcb_data_dict: Dictionary with PCB identifiers as keys and their respective materials as values.
-    :param material_catalogue_dict: Dictionary with material identifiers as keys and their respective slot widths as values.
-    :param C_max: Maximum allowed slot width for any group.
-    :param dataset_path: Path to the dataset where the results will be saved.
-    :param execution_time: Execution time of the process.
-    """
-    shortest_combination = len(best_combinations[0])
-
-    process = psutil.Process(os.getpid())                                # get process information
-    memory_usage = process.memory_info().rss                             # in bytes
-    cpu_times = process.cpu_times()                                      # CPU times
-    num_threads = process.num_threads()                                  # number of threads
-    print(f"Execution time: {execution_time} seconds")
-    print(f"Memory usage: {memory_usage / (1024 * 1024)} MB")
-    print(f"CPU Times: User Time = {cpu_times.user} seconds, System Time = {cpu_times.system} seconds")
-    print(f"Number of Threads: {num_threads}")
-
-    filename = f"{dataset_path}BF_results_pcbs_{len(pcb_list):02d}.txt"    # writing the results to a text file
-    with open(filename, 'w') as file:
-        file.write(f"Number of combined PCBs: {len(pcb_list)} \n")
-        file.write(f"Max Feeder Capacity time: {C_max}\n")
-        file.write(f"Execution time: {execution_time} seconds\n")
-        file.write(f"Memory usage: {memory_usage / (1024 * 1024)} MB\n")    # convert bytes to MB
-        file.write(f"CPU Times: User Time = {cpu_times.user} seconds, System Time = {cpu_times.system} seconds\n")
-        file.write(f"Number of Threads: {num_threads}\n")
-        file.write(f"Number of possible combinations that fulfill capacity constraint: {len(best_combinations)}\n")
-        file.write(f"Number of combinations with the least amount of groups: {len(best_combinations)}\n")
-        file.write(f"Number of groups necessary: {shortest_combination}\n \n")
-        for count, combination in enumerate(best_combinations):
-            file.write(f"Combination {count + 1} with {len(combination)} groups contain:\n")
-            for group_count, group in enumerate(combination):
-                file.write(f"\nGroup {group_count + 1} contains PCBs:\n")
-                for pcb in group:
-                    file.write(f"{pcb} ")
-                file.write(f"\nGroup {group_count + 1} contains materials:\n")
-                used_material = []
-                for pcb in group:
-                    for material in pcb_data_dict[pcb]:
-                        if material not in used_material:
-                            used_material.append(material)
-                for material in used_material:
-                    file.write(f"{material} ")
-                file.write("\n")
-            file.write("\n")
-
-
 import time
 import pandas as pd
 import multiprocessing
