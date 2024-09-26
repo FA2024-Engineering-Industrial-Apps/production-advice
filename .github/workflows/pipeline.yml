@@ -4,10 +4,10 @@ name: CI Pipeline
 on:
   push:
     branches:
-      - ${{ github.event.repository.default_branch }}
+      - main
   pull_request:
     branches:
-      - ${{ github.event.repository.default_branch }}
+      - main
 
 jobs:
   static-analysis:
