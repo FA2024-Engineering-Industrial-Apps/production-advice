@@ -11,6 +11,7 @@ import psutil
 import os
 import sys
 import multiprocessing
+from multiprocessing import freeze_support
 import copy
 def is_valid_group(group, pcb_data_dict, material_catalogue_dict, C_max):
     '''
@@ -113,6 +114,7 @@ def find_first_combination(max_num_group, pcb_list, pcb_data_dict, material_cata
     :param C_max: Maximum allowed slot width for any group.
     :return: Minimum number of groups needed to create a valid combination of PCBs.
     """
+    freeze_support()
     manager = multiprocessing.Manager()
     shared_mingp = multiprocessing.Value('i', len(pcb_list))    # shared integer value to store the minimum number of groups found, initialized to number_of_data - 1
 
@@ -193,6 +195,7 @@ def main(pcb_list, pcb_data_dict, material_catalogue_dict, C_max, min_gp):
     :param min_gp: Minimum number of groups for a valid combination.
     :return List of best combinations of PCBs with minimum number of groups needed to create a valid combination of PCBs.
     """
+    freeze_support()
     manager = multiprocessing.Manager()             # set up multiprocessing manager and shared list for output
     output_list = manager.list()
     best_combinations_set = set()

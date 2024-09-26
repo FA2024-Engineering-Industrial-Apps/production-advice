@@ -5,6 +5,7 @@ from BruteForcing_Parallel_func import call_list_parallel
 from BruteForcing_Hybrid_func import call_list_hybrid
 from langchain_core.messages import HumanMessage, SystemMessage
 import pandas as pd
+from multiprocessing import freeze_support
 
 
 if __name__ == "__main__":
@@ -22,30 +23,35 @@ if __name__ == "__main__":
         """
         json_data = call_list(NumberOfPCBs)
         return json_data
-    
+
     @tool
-    def CallHybridOptimizer(NumberOfPcbs):
+    def CallHybridOptimizer(NumberOfPCBs):
         """
         Function to optimize the grouping of PCBs for the production line in a hybrid manner. That means that the optimization 
         is done with serial and parallel optimization.
         This Function should be invoked if the optimization of the PCBs should be done in a hybrid manner.
         Args: NumberOfPCBs: this should either be a a list of PCBs or a single int for a range of PCBs.
         """
-        json_data = call_list_hybrid(NumberOfPcbs)
+        json_data = call_list_hybrid(NumberOfPCBs)
         return json_data
-    
+
     @tool
-    def CallParallelOptimizer(NumberOfPcbs):
+    def CallParallelOptimizer(NumberOfPCBs):
         """
         Function to optimize the grouping of PCBs for the production line in a parallel manner.
         This Function whould be invoked if the optimization of the PCBs should be done in parallel.
         Args: NumberOfPCBs: this should either be a a list of PCBs or a single int for a range of PCBs. 
         """
-        json_data = call_list_parallel(NumberOfPcbs)
+        json_data = call_list_parallel(NumberOfPCBs)
         return json_data
-    
 
-    tools = [CallOptimizer, Text2Csv, CallParallelOptimizer, CallHybridOptimizer]
+
+    tools = [
+            CallOptimizer
+            ,Text2Csv
+            #,CallParallelOptimizer
+            ,CallHybridOptimizer
+                ]
 
 
 
@@ -55,8 +61,9 @@ if __name__ == "__main__":
     message = [HumanMessage(query), SystemMessage('You are a helpful assitantant.')]
     query2 = "I have to optimize the PCBs 1-5"
     query3 = 'please optimize the PCB grouping for PCBs 1 3 5 7'
-    query4 = 'in parallel please optimize the PCB grouping for PCBs 1 3 5 7'
+    query4 = 'in hybrid please optimize the PCB grouping for PCBs 1 3 5 7'
 
+    freeze_support()
     result = llm.invoke(query4)
     print(result)
     print('\n')
@@ -67,7 +74,7 @@ if __name__ == "__main__":
     tool_mapping = {
                     'CallOptimizer':CallOptimizer
                     ,'Text2Csv': Text2Csv
-                    ,'CallParallelOptimizer':CallParallelOptimizer
+                    #,'CallParallelOptimizer':CallParallelOptimizer
                     ,'CallHybridOptimizer': CallHybridOptimizer
                     } # mapping between tool name and defined tool function
 
