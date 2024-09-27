@@ -48,12 +48,18 @@ tools = [
     PrioritizationChoice
 ]
 agent = create_tool_calling_agent(model, tools, prompt)
-agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+agent_executor = AgentExecutor(
+    agent=agent,
+    tools=tools,
+    verbose=True,
+    return_intermediate_steps=True
+)
 
 if __name__ == "__main__":
-    print(agent_executor.invoke(
+    result = agent_executor.invoke(
         {
-            "input": "Hello there!",
+            "input": "Optimize 1-5",
             "chat_history": []
         }
-    ))
+    )
+    print(result)

@@ -1,7 +1,20 @@
 import streamlit as st
 import llm.setup as llmchat
 from utils.streamlit_utils import *
-import pandas as pd
+
+from typing import Union
+from dataclasses import dataclass
+
+@dataclass
+class DataExport:
+    path: str
+
+EXPORTING_FUNCTIONS = [func.func.__name__ for func in [
+    llmchat.CallOptimizer,
+    llmchat.CallHybridOptimizer,
+    llmchat.CallParallelOptimizer,
+]]
+
 if __name__ == "__main__":
     @st.cache_resource
     def get_llm():
@@ -12,11 +25,18 @@ if __name__ == "__main__":
         st.session_state["messages"] = [llmchat.AIMessage("Hello, how can I help you?")]
         st.session_state["id"] = get_session()
 
+    st.title("Hello Production!")
+
     def write_message(message):
+        if isinstance(message, DataExport):
+            _, c1 = st.columns([3, 1])
+            with c1:
+                with c1.popover("Export", use_container_width=True):
+                    st.markdown(message.path)
+            return
+        
         with st.chat_message(message.type):
             st.markdown(message.content)
-            print("message")
-            print(message)
 
     for message in st.session_state["messages"]:
         write_message(message)
@@ -31,7 +51,20 @@ if __name__ == "__main__":
                 "chat_history": st.session_state.messages,
             }
         )
+
+        # Displaying LLM responce
         output = response["output"]
         with st.chat_message("ai"):
             st.markdown(output)
         st.session_state.messages.append(llmchat.AIMessage(output))
+
+        # Displaying download button if needed
+        if "intermediate_steps" in response:
+            last_step = response["intermediate_steps"][-1]
+            tool_name = last_step[0].tool
+            if tool_name in EXPORTING_FUNCTIONS:
+                export = DataExport(
+                    path=st.session_state["last_function_run"]
+                )
+                st.session_state.messages.append(export)
+                write_message(export)

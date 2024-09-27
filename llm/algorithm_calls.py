@@ -19,7 +19,8 @@ def CallOptimizer(PCBnumber):
     """
     PCBnumber = sanitize_input(PCBnumber)
     json_data = call_list(PCBnumber)
-    solutions_memory['current_solutions'] = json_data 
+    solutions_memory['current_solutions'] = json_data
+    save_output(json_data)
     try:
         if len(json_data['combinations']) > 4:
             return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
@@ -38,7 +39,8 @@ def CallHybridOptimizer(NumberOfPCBs):
     """
     NumberOfPCBs = sanitize_input(NumberOfPCBs)
     json_data = call_list_hybrid(NumberOfPCBs)
-    solutions_memory['current_solutions'] = json_data 
+    solutions_memory['current_solutions'] = json_data
+    save_output(json_data)
     try:
         if len(json_data['combinations']) > 4:
             return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
@@ -57,7 +59,8 @@ def CallParallelOptimizer(NumberOfPCBs):
     """
     NumberOfPCBs = sanitize_input(NumberOfPCBs)
     json_data = call_list_parallel(NumberOfPCBs)
-    solutions_memory['current_solutions'] = json_data 
+    solutions_memory['current_solutions'] = json_data
+    save_output(json_data)
     try:
         if len(json_data['combinations']) > 4:
             return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
