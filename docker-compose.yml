@@ -1,0 +1,16 @@
+version: '2.4'
+services:
+  prod-chatbot:
+    build: .
+    image: 'prod-chatbot:1.0.0'
+#   platform: linux/arm64
+#   If the user wishes to deploy this app on a ARM based Device ( IoT 2050 , Sclance LPE ...), the option platform that is mentioned in line 6 needs to be uncommented 
+    ports:
+      - '8501:8501'
+    mem_limit: 200mb
+    # restart: "unless-stopped"
+    logging: 
+      driver: "json-file"
+      options: 
+        max-size: "10m"
+        max-file: "3"
