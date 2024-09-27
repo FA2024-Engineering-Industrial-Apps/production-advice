@@ -3,6 +3,7 @@ import llm.setup as llmchat
 from utils.streamlit_utils import *
 
 import os
+import re
 from dataclasses import dataclass
 
 @dataclass
@@ -77,13 +78,14 @@ if __name__ == "__main__":
         st.session_state.messages.append(human_message)
         write_message(human_message)
         response = {}
-        with st.status("Thinking..."):
+        with st.status("Thinking...") as status:
             number_of_tries = 1
-            while "output" not in response or "<call_tool>" in response["output"] or "</call_tool>" in response["output"]:
+            while "output" not in response or re.search(r"<(tool|call|ing|_)+(|\/)>", response["output"]):
                 if number_of_tries == 1:
                     st.write(f"Running the model...")
                 else:
                     st.write(f"Rerunning for {number_of_tries}th time...")
+                    st.session_state.messages.append(llmchat.AIMessage("Function execution failed. Remember, that functions accept only JSON input. Please format the user request accordingly."))
                 number_of_tries += 1
 
                 response = get_llm().invoke(
@@ -94,8 +96,13 @@ if __name__ == "__main__":
                                 if not DataExport.isinstance(msg)
                         ],
                     },
-                    
+                    config={
+                        "callbacks": [llmchat.OnToolCall(
+                            lambda tool_name: st.write(f"Using {tool_name}...")
+                        )]
+                    }
                 )
+            status.update(label="Done")
 
         # Displaying LLM responce
         output = response["output"]
@@ -104,12 +111,14 @@ if __name__ == "__main__":
         st.session_state.messages.append(llmchat.AIMessage(output))
 
         # Displaying download button if needed
-        if "intermediate_steps" in response and len(response["intermediate_steps"]) > 0:
+        if "intermediate_steps" in response and len(response["intermediate_steps"]) > 0 and \
+                "last_function_run" in st.session_state and st.session_state["last_function_run"] is not None:
             last_step = response["intermediate_steps"][-1]
             tool_name = last_step[0].tool
             if tool_name in EXPORTING_FUNCTIONS:
                 export = DataExport(
                     path=st.session_state["last_function_run"]
                 )
+                st.session_state["last_function_run"] = None
                 st.session_state.messages.append(export)
                 write_message(export)

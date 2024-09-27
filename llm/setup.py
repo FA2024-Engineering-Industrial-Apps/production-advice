@@ -6,10 +6,13 @@ from llm.prioritization_calls import *
 from llm.prompt import *
 from utils.create_csv import create_csv_from_input
 
+from typing import Callable
+
 import pandas as pd
+from langchain_core.callbacks import BaseCallbackHandler
 from langchain_ollama import ChatOllama
 from langchain.agents import AgentExecutor, create_tool_calling_agent, tool
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
 
 @tool
@@ -48,6 +51,17 @@ tools = [
     PrioritizationChoice
 ]
 agent = create_tool_calling_agent(model, tools, prompt)
+
+class OnToolCall(BaseCallbackHandler):
+    def __init__(self, callback: Callable[[str], None]) -> None:
+        super().__init__()
+        self.callback = callback
+
+    def on_tool_start(self, *args, **kwargs):
+        function_name = args[0]["name"]
+        self.callback(function_name)
+        return super().on_tool_start(*args, **kwargs)
+
 agent_executor = AgentExecutor(
     agent=agent,
     tools=tools,
@@ -58,8 +72,11 @@ agent_executor = AgentExecutor(
 if __name__ == "__main__":
     result = agent_executor.invoke(
         {
-            "input": "Optimize 1-5",
+            "input": "opt 1-15",
             "chat_history": []
+        },
+        config={
+            "callbacks": [OnToolCall(lambda name: print(name))]
         }
     )
     print(result)
