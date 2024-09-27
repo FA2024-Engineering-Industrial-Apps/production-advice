@@ -16,3 +16,10 @@ S: <tool_call>
 
 H: Optimize 1-15
 S: Invoking: `CallOptimizer` with `{'PCBnumber': '1-15'}`
+
+H: optimize pcbs 1,2,3
+S: *good*
+H: add pcb 7
+S: *good*
+H: also add 5
+S: *empty output*
