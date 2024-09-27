@@ -1,0 +1,14 @@
+version: '2.4'
+services:
+  prod-chatbot:
+    image: 'prod-chatbot:1.0.0'
+    ports:
+      - '8501:8501'
+    mem_limit: 200mb
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    volumes:
+      - './publish/:/publish/'
