@@ -13,6 +13,10 @@ from langchain_core.messages import HumanMessage, AIMessage
 
 solutions_memory = {}
 
+def sanitize_input(input):
+    if isinstance(input, str):
+        return json.loads(input)
+    return input
 @tool
 def Text2Csv(text):
     """Converts text to a csv file"""
@@ -26,6 +30,7 @@ def CallOptimizer(NumberOfPCBs):
     Args: 
         - NumberOfPCBs: this should either be a a list of PCBs or a single int for a range of PCBs.
     """
+    NumberOfPCBs = sanitize_input(NumberOfPCBs)
     json_data = call_list(NumberOfPCBs)
     solutions_memory['current_solutions'] = json_data 
     if len(json_data['combinations']) > 4:
@@ -41,6 +46,7 @@ def CallHybridOptimizer(NumberOfPCBs):
     Args: 
         - NumberOfPCBs: this should either be a a list of PCBs or a single int for a range of PCBs.
     """
+    NumberOfPCBs = sanitize_input(NumberOfPCBs)
     json_data = call_list_hybrid(NumberOfPCBs)
     solutions_memory['current_solutions'] = json_data 
     if len(json_data['combinations']) > 4:
@@ -56,6 +62,7 @@ def CallParallelOptimizer(NumberOfPCBs):
     Args: 
         - NumberOfPCBs: this should either be a a list of PCBs or a single int for a range of PCBs. 
     """
+    NumberOfPCBs = sanitize_input(NumberOfPCBs)
     json_data = call_list_parallel(NumberOfPCBs)
     solutions_memory['current_solutions'] = json_data 
     if len(json_data['combinations']) > 4:
@@ -73,8 +80,7 @@ def FilterPCBs(important_pcbs):
     Returns:
         - A filtered list of groups that include at least one of the important PCBs.
     """
-    
-   
+    important_pcbs = sanitize_input(important_pcbs)
     important_pcbs_str = [f"PCB{str(pcb).zfill(3)}" for pcb in important_pcbs]
 
     solutions = solutions_memory.get('current_solutions')
