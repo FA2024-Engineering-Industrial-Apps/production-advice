@@ -2,3 +2,24 @@ H: I want to optimize PCBs 1 2 3
 S: system outputs optimal grouping
 H: Now add 7 to it
 -> system should ask user if 1,2,3,7 should be optimized together now 
+
+
+
+-> Usage of SAP data when SAP orders doesnt contain the PCBs to optimize (Model should output that there are no open orders when prio base din sap is later selected)
+H: Please optimize PCBs 1-8
+
+
+H: Optimize 1-15
+S: <tool_call>
+{"name": "CallOptimizer", "arguments": {"PCBnumber": list(range(1, 16))}}
+</tool_call> (Which is not correct)
+
+H: Optimize 1-15
+S: Invoking: `CallOptimizer` with `{'PCBnumber': '1-15'}`
+
+H: optimize pcbs 1,2,3
+S: *good*
+H: add pcb 7
+S: *good*
+H: also add 5
+S: *empty output*
