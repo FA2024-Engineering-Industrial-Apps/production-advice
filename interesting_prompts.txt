@@ -2,3 +2,9 @@ H: I want to optimize PCBs 1 2 3
 S: system outputs optimal grouping
 H: Now add 7 to it
 -> system should ask user if 1,2,3,7 should be optimized together now 
+
+
+
+-> Usage of SAP data when SAP orders doesnt contain the PCBs to optimize (Model should output that there are no open orders when prio base din sap is later selected)
+H: Please optimize PCBs 1-8
+

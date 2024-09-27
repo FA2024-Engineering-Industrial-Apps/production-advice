@@ -3,6 +3,7 @@ sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
 
 from llm.algorithm_calls import *
 from llm.filtering_calls import *
+from llm.prioritization_calls import *
 from llm.prompt import *
 
 import pandas as pd
@@ -32,7 +33,15 @@ model = ChatOllama(
     base_url="workstation.ferienakademie.de"
 )
 
-tools = [CallOptimizer, CallHybridOptimizer, CallParallelOptimizer, FilterPCBs, Text2Csv]
+tools = [
+    CallOptimizer,
+    CallHybridOptimizer,
+    CallParallelOptimizer,
+    FilterPCBs,
+    Text2Csv,
+    PrioritizeBasedOnSAP,
+    PrioritizationChoice
+]
 agent = create_tool_calling_agent(model, tools, prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
