@@ -2,12 +2,15 @@ import streamlit as st
 import llm.setup as llmchat
 from utils.streamlit_utils import *
 
-from typing import Union
+import os
 from dataclasses import dataclass
 
 @dataclass
 class DataExport:
     path: str
+
+    def __post_init__(self):
+        self.id = int(os.path.basename(self.path)[:-len(".json")])
 
     @classmethod
     def isinstance(cls, obj) -> bool:
@@ -19,6 +22,26 @@ EXPORTING_FUNCTIONS = [func.func.__name__ for func in [
     llmchat.CallParallelOptimizer,
 ]]
 
+def display_export_button(export: DataExport):
+    _, c1 = st.columns([3, 1])
+    with c1:
+        with c1.popover("Export", use_container_width=True):
+            # TODO: implement buttons functionality
+            st.download_button(
+                label="Download CSV export",
+                data="to be implemented",
+                file_name=f"export_{export.id}.csv"
+            )
+            st.download_button(
+                label="Download PDF export",
+                data="to be implemented",
+                file_name=f"export_{export.id}.pdf"
+            )
+            st.button(
+                label="Deploy to workstation",
+                on_click=lambda: print("Deployment was requested")
+            )
+
 if __name__ == "__main__":
     @st.cache_resource
     def get_llm():
@@ -26,17 +49,17 @@ if __name__ == "__main__":
 
     if "started" not in st.session_state:
         st.session_state["started"] = True
-        st.session_state["messages"] = [llmchat.AIMessage("Hello, how can I help you?")]
+        st.session_state["messages"] = [
+            llmchat.AIMessage("Hello, how can I help you?"),
+            DataExport("./output/1.json") # For testing purposes
+        ]
         st.session_state["id"] = get_session()
 
     st.title("Hello Production!")
 
     def write_message(message):
         if DataExport.isinstance(message):
-            _, c1 = st.columns([3, 1])
-            with c1:
-                with c1.popover("Export", use_container_width=True):
-                    st.markdown(message.path)
+            display_export_button(message)
             return
         
         with st.chat_message(message.type):
