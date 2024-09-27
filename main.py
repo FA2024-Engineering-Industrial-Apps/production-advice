@@ -9,6 +9,10 @@ from dataclasses import dataclass
 class DataExport:
     path: str
 
+    @classmethod
+    def isinstance(cls, obj) -> bool:
+        return type(obj).__name__ == cls.__name__
+
 EXPORTING_FUNCTIONS = [func.func.__name__ for func in [
     llmchat.CallOptimizer,
     llmchat.CallHybridOptimizer,
@@ -28,7 +32,7 @@ if __name__ == "__main__":
     st.title("Hello Production!")
 
     def write_message(message):
-        if isinstance(message, DataExport):
+        if DataExport.isinstance(message):
             _, c1 = st.columns([3, 1])
             with c1:
                 with c1.popover("Export", use_container_width=True):
@@ -48,7 +52,10 @@ if __name__ == "__main__":
         response = get_llm().invoke(
             {
                 "input": prompt,
-                "chat_history": st.session_state.messages,
+                "chat_history": [
+                    msg for msg in st.session_state.messages
+                        if not DataExport.isinstance(msg)
+                ],
             }
         )
 
@@ -59,7 +66,7 @@ if __name__ == "__main__":
         st.session_state.messages.append(llmchat.AIMessage(output))
 
         # Displaying download button if needed
-        if "intermediate_steps" in response:
+        if "intermediate_steps" in response and len(response["intermediate_steps"]) > 0:
             last_step = response["intermediate_steps"][-1]
             tool_name = last_step[0].tool
             if tool_name in EXPORTING_FUNCTIONS:
