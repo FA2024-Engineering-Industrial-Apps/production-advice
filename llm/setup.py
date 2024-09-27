@@ -5,6 +5,7 @@ from algorithms.bruteforce.serial import call_list
 from algorithms.bruteforce.parallel import call_list_parallel
 from algorithms.bruteforce.hybrid import call_list_hybrid
 import pandas as pd
+import json
 
 from langchain_ollama import ChatOllama
 from langchain.agents import AgentExecutor, create_tool_calling_agent, tool
