@@ -1,9 +1,12 @@
+import sys, os.path as path
+sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
+
 from langchain.agents import tool
 
 from algorithms.bruteforce.serial import call_list
 from algorithms.bruteforce.parallel import call_list_parallel
 from algorithms.bruteforce.hybrid import call_list_hybrid
-from prompt_utils import *
+from llm.prompt_utils import *
 
 solutions_memory = {}
 

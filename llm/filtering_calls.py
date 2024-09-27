@@ -1,7 +1,10 @@
+import sys, os.path as path
+sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
+
 from langchain.agents import tool
 
-from prompt_utils import *
-from algorithm_calls import solutions_memory
+from llm.prompt_utils import *
+from llm.algorithm_calls import solutions_memory
 
 @tool
 def FilterPCBs(important_pcbs):
