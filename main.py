@@ -72,15 +72,18 @@ if __name__ == "__main__":
         human_message = llmchat.HumanMessage(prompt)
         st.session_state.messages.append(human_message)
         write_message(human_message)
-        response = get_llm().invoke(
-            {
-                "input": prompt,
-                "chat_history": [
-                    msg for msg in st.session_state.messages
-                        if not DataExport.isinstance(msg)
-                ],
-            }
-        )
+        output = None
+        response = {}
+        while output is None or "output" not in response or "<call_tool>" in response["output"] or "</call_tool>" in response["output"]:
+            response = get_llm().invoke(
+                {
+                    "input": prompt,
+                    "chat_history": [
+                        msg for msg in st.session_state.messages
+                            if not DataExport.isinstance(msg)
+                    ],
+                }
+            )
 
         # Displaying LLM responce
         output = response["output"]
