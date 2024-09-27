@@ -25,18 +25,21 @@ def Text2Csv(text):
 
 
 @tool
-def CallOptimizer(NumberOfPCBs):
+def CallOptimizer(PCBnumber):
     """
     Function to optimize the grouping of PCBs for the production line.
     Args: 
-        - NumberOfPCBs: this should either be a a list of PCBs or a single int for a range of PCBs.
+        - PCBnumber: this should either be a a list of PCBs or a single int for one PCBs.
     """
-    NumberOfPCBs = sanitize_input(NumberOfPCBs)
-    json_data = call_list(NumberOfPCBs)
+    PCBnumber = sanitize_input(PCBnumber)
+    json_data = call_list(PCBnumber)
     solutions_memory['current_solutions'] = json_data 
-    if len(json_data['combinations']) > 4:
-        return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
-    else:
+    try:
+        if len(json_data['combinations']) > 4:
+            return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
+        else:
+            return json_data
+    except:
         return json_data
 
 
@@ -50,9 +53,12 @@ def CallHybridOptimizer(NumberOfPCBs):
     NumberOfPCBs = sanitize_input(NumberOfPCBs)
     json_data = call_list_hybrid(NumberOfPCBs)
     solutions_memory['current_solutions'] = json_data 
-    if len(json_data['combinations']) > 4:
-        return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
-    else:
+    try:
+        if len(json_data['combinations']) > 4:
+            return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
+        else:
+            return json_data
+    except:
         return json_data
 
 
@@ -66,9 +72,12 @@ def CallParallelOptimizer(NumberOfPCBs):
     NumberOfPCBs = sanitize_input(NumberOfPCBs)
     json_data = call_list_parallel(NumberOfPCBs)
     solutions_memory['current_solutions'] = json_data 
-    if len(json_data['combinations']) > 4:
-        return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
-    else:
+    try:
+        if len(json_data['combinations']) > 4:
+            return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
+        else:
+            return json_data
+    except:
         return json_data
     
 @tool
