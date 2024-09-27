@@ -23,6 +23,7 @@ EXPORTING_FUNCTIONS = [func.func.__name__ for func in [
 ]]
 
 def display_export_button(export: DataExport):
+    id = export.id
     _, c1 = st.columns([3, 1])
     with c1:
         with c1.popover("Export", use_container_width=True):
@@ -30,16 +31,19 @@ def display_export_button(export: DataExport):
             st.download_button(
                 label="Download CSV export",
                 data="to be implemented",
-                file_name=f"export_{export.id}.csv"
+                file_name=f"export_{export.id}.csv",
+                key=f"csv_button_{id}"
             )
             st.download_button(
                 label="Download PDF export",
                 data="to be implemented",
-                file_name=f"export_{export.id}.pdf"
+                file_name=f"export_{export.id}.pdf",
+                key=f"pdf_button_{id}"
             )
             st.button(
                 label="Deploy to workstation",
-                on_click=lambda: print("Deployment was requested")
+                on_click=lambda: print("Deployment was requested"),
+                key=f"deploy_button_{id}"
             )
 
 if __name__ == "__main__":
@@ -51,7 +55,7 @@ if __name__ == "__main__":
         st.session_state["started"] = True
         st.session_state["messages"] = [
             llmchat.AIMessage("Hello, how can I help you?"),
-            DataExport("./output/1.json") # For testing purposes
+            # DataExport("./output/1.json") # For testing purposes
         ]
         st.session_state["id"] = get_session()
 
@@ -72,18 +76,26 @@ if __name__ == "__main__":
         human_message = llmchat.HumanMessage(prompt)
         st.session_state.messages.append(human_message)
         write_message(human_message)
-        output = None
         response = {}
-        while output is None or "output" not in response or "<call_tool>" in response["output"] or "</call_tool>" in response["output"]:
-            response = get_llm().invoke(
-                {
-                    "input": prompt,
-                    "chat_history": [
-                        msg for msg in st.session_state.messages
-                            if not DataExport.isinstance(msg)
-                    ],
-                }
-            )
+        with st.status("Thinking..."):
+            number_of_tries = 1
+            while "output" not in response or "<call_tool>" in response["output"] or "</call_tool>" in response["output"]:
+                if number_of_tries == 1:
+                    st.write(f"Running the model...")
+                else:
+                    st.write(f"Rerunning for {number_of_tries}th time...")
+                number_of_tries += 1
+
+                response = get_llm().invoke(
+                    {
+                        "input": prompt,
+                        "chat_history": [
+                            msg for msg in st.session_state.messages
+                                if not DataExport.isinstance(msg)
+                        ],
+                    },
+                    
+                )
 
         # Displaying LLM responce
         output = response["output"]
