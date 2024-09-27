@@ -18,18 +18,18 @@ def Text2Csv(text):
     return 'not yet implemented'
 
 
-key_path = "./key.txt"
-if path.isfile(key_path):
-    with open("key.txt", "r") as file:
-        api_endpoint = file.read()
-else:
-    raise RuntimeError("No key.txt provided!")
+# key_path = "./key.txt"
+# if path.isfile(key_path):
+#     with open("key.txt", "r") as file:
+#         api_endpoint = file.read()
+# else:
+#     raise RuntimeError("No key.txt provided!")
 
 model = ChatOllama(
-    model="llama3.1:70b",
+    model="qwen2.5:32b",
     temperature=0,
     seed=0,
-    base_url=api_endpoint
+    base_url="workstation.ferienakademie.de"
 )
 
 tools = [CallOptimizer, CallHybridOptimizer, CallParallelOptimizer, FilterPCBs, Text2Csv]
