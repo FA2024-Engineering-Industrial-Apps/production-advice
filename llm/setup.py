@@ -1,9 +1,9 @@
 import sys, os.path as path
 sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
 
-from algorithm_calls import *
-from filtering_calls import *
-from prompt import *
+from llm.algorithm_calls import *
+from llm.filtering_calls import *
+from llm.prompt import *
 
 import pandas as pd
 
