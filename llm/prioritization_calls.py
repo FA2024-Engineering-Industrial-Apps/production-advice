@@ -16,7 +16,7 @@ path_to_vbap = "SAP_Data/VBAP.csv"
 
 
 @tool
-def FilterPCBs(important_pcbs):
+def FilterPCBsFromUserInput(important_pcbs):
     """
     Filters the PCB combinations based on user-specified important PCBs.
     Args: 
@@ -49,24 +49,27 @@ def FilterPCBs(important_pcbs):
     return filtered_groups
 
 
-@tool
+
+
 def PrioritizeBasedOnSAP():
     """
     Prioritize PCBs based on SAP data (VBAP table). Select PCBs with the closest delivery dates.
-    This function genereated the PCB that should be prioritized and can be used as input for the FilterPCBs function
+    This function generates the PCB that should be prioritized and can be used as input for the FilterPCBs function.
+    
+    Modified to return a list of tuples with PCBs grouped by their delivery date for the next 7 days.
     """
     vbap_df = pd.read_csv(path_to_vbap)
     vbap_df["EDATU"] = pd.to_datetime(vbap_df["EDATU"])
     
-    upcoming_orders = vbap_df[vbap_df["EDATU"] > current_date]
-    closest_orders = upcoming_orders.sort_values(by="EDATU").head(5)  # Limit to 5 closest 
+    upcoming_orders = vbap_df[(vbap_df["EDATU"] > current_date) & (vbap_df["EDATU"] <= current_date + dt.timedelta(days=7))]
     
-    prioritized_pcbs = closest_orders["MATNR"].tolist()
+    upcoming_orders_sorted = upcoming_orders.sort_values(by="EDATU")
     
-    if prioritized_pcbs:
-        return f"PCBs with the delivery dates in descending order: {prioritized_pcbs}. If the Input from the Human doenst match with these tell the Human that there are no open order for the PCBs the Human mentioned."
-    else:
-        return "No upcoming orders found for prioritization."
+    grouped_orders = upcoming_orders_sorted.groupby("EDATU")["MATNR"].apply(list)
+    prioritized_pcbs = [tuple(pcbs) for pcbs in grouped_orders]
+    
+    return prioritized_pcbs
+
 
 @tool
 def PrioritizationChoice():

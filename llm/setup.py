@@ -34,7 +34,8 @@ tools = [
     CallOptimizer,
     CallHybridOptimizer,
     CallParallelOptimizer,
-    FilterPCBs,
+    FilterPCBsFromUserInput,
+    #FilterPCBsFromSAPPrioritization,
     Text2Csv,
     PrioritizeBasedOnSAP,
     PrioritizationChoice
