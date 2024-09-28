@@ -53,13 +53,14 @@ tools = [
 agent = create_tool_calling_agent(model, tools, prompt)
 
 class OnToolCall(BaseCallbackHandler):
-    def __init__(self, callback: Callable[[str], None]) -> None:
+    def __init__(self, callback: Callable[[str, str], None]) -> None:
         super().__init__()
         self.callback = callback
 
     def on_tool_start(self, *args, **kwargs):
         function_name = args[0]["name"]
-        self.callback(function_name)
+        function_arguments = args[1]
+        self.callback(function_name, function_arguments)
         return super().on_tool_start(*args, **kwargs)
 
 agent_executor = AgentExecutor(

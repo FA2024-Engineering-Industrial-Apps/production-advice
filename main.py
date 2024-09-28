@@ -110,6 +110,10 @@ if __name__ == "__main__":
                     st.session_state.messages.append(llmchat.AIMessage("Function execution failed. Remember, that functions accept only JSON input. Please format the user request accordingly."))
                 number_of_tries += 1
 
+                def on_tool_call(function_name: str, function_arguments: str) -> None:
+                    st.write(f"Using {function_name}...")
+                    st.markdown(f"\t`{function_arguments}`")
+
                 response = get_llm().invoke(
                     {
                         "input": prompt,
@@ -119,9 +123,7 @@ if __name__ == "__main__":
                         ],
                     },
                     config={
-                        "callbacks": [llmchat.OnToolCall(
-                            lambda tool_name: st.write(f"Using {tool_name}...")
-                        )]
+                        "callbacks": [llmchat.OnToolCall(on_tool_call)]
                     }
                 )
             status.update(label="Done")
