@@ -1,5 +1,6 @@
 import streamlit as st
 import llm.setup as llmchat
+from llm.algorithm_calls import solutions_memory
 from utils.streamlit_utils import *
 import utils.create_csv as csv_utils
 
@@ -101,6 +102,9 @@ if __name__ == "__main__":
         write_message(human_message)
         response = {}
         with st.status("Thinking...") as status:
+            # In this way the model would have to run algorithm again if the prioritization is requested
+            solutions_memory.clear()
+
             number_of_tries = 1
             while "output" not in response or re.search(r"<(tool|call|ing|_)+(|\/)>", response["output"]):
                 if number_of_tries == 1:
