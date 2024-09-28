@@ -1,5 +1,8 @@
+import os
+import re
 import time
 import csv
+from typing import TextIO
 
 # Function to generate CSV from given input and save with timestamped filename
 def create_csv_from_input(input_data):
@@ -21,8 +24,36 @@ def create_csv_from_input(input_data):
 
     return file_path
 
-# def create_csv_alles_combinations(input_data):
+
+def _combination_to_csv(json_data: dict, combination_id: int, writer) -> None:
+    for group in json_data["groups"]:
+        group_id = group["group_id"]
+        for pcb in group["PCBs"]:
+            # TODO: also write materials
+            writer.writerow([combination_id, group_id, pcb])
+
+def json_solution_to_tabular_csv(file_id: int, json_data: dict) -> str:
+    path = os.path.abspath(os.path.join(
+        __file__,
+        os.path.pardir,
+        os.path.pardir,
+        f"output/{file_id}_tabular.csv"
+    ))
+
+    with open(path, "w") as file:
+        writer = csv.writer(file, lineterminator="\n")
+        if "groups" in json_data:
+            _combination_to_csv(json_data, 1, writer)
+            return path
+        
+        for combination in json_data["combinations"]:
+            combination_name, groups = next(iter(combination.items()))
+            m = re.match(r"combination(\d+)", combination_name)
+            assert m
+            _combination_to_csv(
+                {"groups": groups},
+                int(m.group(1)),
+                writer
+            )
     
-# def fetch_and_clean_data(url):
-#     # Fetch data from URL here, and then clean it up.
-#     return data
+    return path
