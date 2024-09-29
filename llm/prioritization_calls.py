@@ -10,6 +10,9 @@ from algorithms.objects import *
 from llm.prompt_utils import *
 from llm.algorithm_calls import solutions_memory
 
+TIME_PER_SETUP_CHANGE = 2 * 60 * 60
+TIME_PER_PCB = 10
+
 
 current_date = dt.datetime.strptime("2024-10-03", "%Y-%m-%d")
 
@@ -68,26 +71,77 @@ def PrioritizeBasedOnSAP():
     if not isinstance(solutions, dict):
         return {"error": "First optimization should be called before prioritizing PCBs."}
     combinations = Combinations.from_json(solutions)
+
+    sap_plan = [*upcoming_orders_sorted.groupby("EDATU", as_index=False)[["MATNR", "KWMENG"]].agg(list).itertuples(index=False, name=None)]
     
     for combination in combinations.combinations:
         slack = int(0)
+        prev_date = current_date
         mapping = {pcb.name: group_id for (group_id, group) in enumerate(combination.groups) for pcb in group.pcbs}
         # TODO: optimize if there is an overlap between different days, and we can start with the same group we left yesterday
-        for date, pcbs, number in upcoming_orders_sorted.groupby("EDATU", as_index=False)[["MATNR", "KWMENG"]].agg(list).itertuples(index=False, name=None):
+        for date, pcbs, number in sap_plan:
             assert isinstance(date, pd.Timestamp)
-            slack += (date.to_pydatetime() - current_date).total_seconds()
+            slack += (date.to_pydatetime() - prev_date).total_seconds()
+            prev_date = date.to_pydatetime()
 
             used_groups = {mapping[pcb_name] for pcb_name in pcbs}
             total_amount = sum(number)
 
-            slack -= len(used_groups) * (2 * 60 * 60)  # 2 hours per group switch
-            slack -= total_amount * (10) # 10 seconds per PCB
+            slack -= len(used_groups) * TIME_PER_SETUP_CHANGE
+            slack -= total_amount * TIME_PER_PCB
 
             if slack < 0:
                 break
         
         if slack >= 0:
-            return combination.to_json()                
+            mapping = {pcb.name: group_id for (group_id, group) in enumerate(combination.groups) for pcb in group.pcbs}
+            slack = int(0)
+
+            days_stack = []
+            prev_date = current_date
+            cur_date = None
+
+            current_order = []
+            current_group = None
+
+            orderding = []
+
+            for date, pcbs, number in sap_plan:
+                assert isinstance(date, pd.Timestamp)
+                days_stack.append(date.to_pydatetime())
+                
+                for pcb, amount in sorted(zip(pcbs, number), key=lambda x: mapping[x[0]]):
+                    delta = ((current_group != mapping[pcb]) * TIME_PER_SETUP_CHANGE) + (amount * TIME_PER_PCB)
+                    if delta > slack:
+                        orderding.append({
+                            "date": cur_date,
+                            "order": current_order
+                        })
+                        
+                        current_group = None
+                        delta = ((current_group != mapping[pcb]) * TIME_PER_SETUP_CHANGE) + (amount * TIME_PER_PCB)
+                        while slack < delta:
+                            cur_date = days_stack.pop(0)
+                            slack += int((cur_date - prev_date).total_seconds())
+                            prev_date = cur_date
+                        current_order = []
+                    
+                    slack -= delta
+                    if current_group != mapping[pcb]:
+                        current_group = mapping[pcb]
+                        current_order.append("SETUP_CHANGE")
+                    current_order.append(pcb)
+            
+            if current_order:
+                orderding.append({
+                    "date": cur_date.strftime("%Y-%m-%d"),
+                    "order": current_order
+                })
+
+            return {
+                "combination": combination.to_json(),
+                "production_plan": orderding[1:]
+            }
     
     return {"error": "No combination found with enough slack to fit the upcoming orders."}
 
@@ -99,3 +153,15 @@ def PrioritizationChoice():
     before calling the FilterPCBs function.
     """
     return "Do you want to prioritize based on SAP data or your own input? Please specify."
+
+
+if __name__ == "__main__":
+    path_0 = "output/0.json"
+    with open(path_0, "r") as file:
+        solutions = json.load(file)
+    
+    solutions_memory = {
+        "current_solutions": solutions
+    }
+
+    print(PrioritizeBasedOnSAP({}))
