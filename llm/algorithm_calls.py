@@ -15,11 +15,16 @@ def CallOptimizer(PCBnumber):
     """
     Function to optimize the grouping of PCBs for the production line.
     Args: 
-        - PCBnumber: this should either be a a list of PCBs or a single int for one PCBs.
+        - PCBnumber: this should either be a a list of PCBs or a single int for one PCBs. If a range of PCBs should be optimized, expand it as a list of consecutive integers (e.g., 1-5 -> [1, 2, 3, 4, 5]).
     """
-    PCBnumber = sanitize_input(PCBnumber)
-    json_data = call_list(PCBnumber)
-    solutions_memory['current_solutions'] = json_data 
+    try:
+        PCBnumber = sanitize_input(PCBnumber)
+        json_data = call_list(PCBnumber)
+    except:
+        return "Incorrect function parameters are provided: PCBnumber: this should either be a a list of PCBs or a single int for one PCBs"
+    
+    solutions_memory['current_solutions'] = json_data
+    save_output(json_data)
     try:
         if len(json_data['combinations']) > 4:
             return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
@@ -36,9 +41,14 @@ def CallHybridOptimizer(NumberOfPCBs):
     Args: 
         - NumberOfPCBs: this should either be a a list of PCBs or a single int for a range of PCBs.
     """
-    NumberOfPCBs = sanitize_input(NumberOfPCBs)
-    json_data = call_list_hybrid(NumberOfPCBs)
-    solutions_memory['current_solutions'] = json_data 
+    try:
+        NumberOfPCBs = sanitize_input(NumberOfPCBs)
+        json_data = call_list_hybrid(NumberOfPCBs)
+    except:
+        return "Incorrect function parameters are provided: PCBnumber: this should either be a a list of PCBs or a single int for one PCBs"
+    
+    solutions_memory['current_solutions'] = json_data
+    save_output(json_data)
     try:
         if len(json_data['combinations']) > 4:
             return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
@@ -55,9 +65,14 @@ def CallParallelOptimizer(NumberOfPCBs):
     Args: 
         - NumberOfPCBs: this should either be a a list of PCBs or a single int for a range of PCBs. 
     """
-    NumberOfPCBs = sanitize_input(NumberOfPCBs)
-    json_data = call_list_parallel(NumberOfPCBs)
-    solutions_memory['current_solutions'] = json_data 
+    try:
+        NumberOfPCBs = sanitize_input(NumberOfPCBs)
+        json_data = call_list_parallel(NumberOfPCBs)
+    except:
+        return "Incorrect function parameters are provided: PCBnumber: this should either be a a list of PCBs or a single int for one PCBs"
+    
+    solutions_memory['current_solutions'] = json_data
+    save_output(json_data)
     try:
         if len(json_data['combinations']) > 4:
             return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
