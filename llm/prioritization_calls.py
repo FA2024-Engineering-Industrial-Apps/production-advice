@@ -1,6 +1,7 @@
 import sys, os.path as path
 sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
 
+from functools import reduce
 import datetime as dt
 
 import pandas as pd
@@ -9,6 +10,11 @@ from langchain.agents import tool
 from algorithms.objects import *
 from llm.prompt_utils import *
 from llm.algorithm_calls import solutions_memory
+
+TIME_PER_SETUP_CHANGE = 2 * 60 * 60
+TIME_PER_PCB = 10
+TIME_PER_DAY = 8 * 60 * 60
+SETUP_CHANGE = "SETUP_CHANGE"
 
 
 current_date = dt.datetime.strptime("2024-10-03", "%Y-%m-%d")
@@ -55,6 +61,7 @@ def PrioritizeBasedOnSAP():
     """
     Prioritize PCBs based on SAP data (VBAP table). Select PCBs with the closest delivery dates.
     This function generates the PCB that should be prioritized and can be used as input for the FilterPCBs function.
+    Would also return the production plan for the prioritized PCBs.
     
     Modified to return a list of tuples with PCBs grouped by their delivery date.
     """
@@ -68,26 +75,60 @@ def PrioritizeBasedOnSAP():
     if not isinstance(solutions, dict):
         return {"error": "First optimization should be called before prioritizing PCBs."}
     combinations = Combinations.from_json(solutions)
+
+    sap_plan = [*upcoming_orders_sorted.groupby("EDATU", as_index=False)[["MATNR", "KWMENG"]].agg(list).itertuples(index=False, name=None)]
     
     for combination in combinations.combinations:
-        slack = int(0)
+        cur_date = current_date
+        cur_deadline = current_date + dt.timedelta(days=1)
+
+        ordering = []
+        cur_group_to_pcbs: dict[int, dict[str, int]] = dict()
+        cur_working_time = 0
+
+        def push_in_ordering():
+            nonlocal ordering, cur_group_to_pcbs, cur_working_time, cur_date
+            ordering.append({
+                "date": cur_date.strftime("%Y-%m-%d"),
+                "order": reduce(lambda x, y: x + [SETUP_CHANGE] + y, ([*entry.items()] for entry in cur_group_to_pcbs.values()), [])
+            })
+            cur_group_to_pcbs = dict()
+            cur_working_time = 0
+            cur_date += dt.timedelta(days=1)
+
         mapping = {pcb.name: group_id for (group_id, group) in enumerate(combination.groups) for pcb in group.pcbs}
-        # TODO: optimize if there is an overlap between different days, and we can start with the same group we left yesterday
-        for date, pcbs, number in upcoming_orders_sorted.groupby("EDATU", as_index=False)[["MATNR", "KWMENG"]].agg(list).itertuples(index=False, name=None):
+        for date, pcbs, number in sap_plan:
             assert isinstance(date, pd.Timestamp)
-            slack += (date.to_pydatetime() - current_date).total_seconds()
+            cur_deadline = date.to_pydatetime()
 
-            used_groups = {mapping[pcb_name] for pcb_name in pcbs}
-            total_amount = sum(number)
+            for pcb, amount in sorted(zip(pcbs, number), key=lambda x: mapping[x[0]]):
+                group = mapping[pcb]
+                while amount > 0:
+                    if cur_date > cur_deadline:
+                        break
 
-            slack -= len(used_groups) * (2 * 60 * 60)  # 2 hours per group switch
-            slack -= total_amount * (10) # 10 seconds per PCB
-
-            if slack < 0:
+                    possible_amount = max(0, min(amount, (TIME_PER_DAY - cur_working_time - (group not in cur_group_to_pcbs) * TIME_PER_SETUP_CHANGE) // TIME_PER_PCB))
+                    if possible_amount > 0:
+                        cur_working_time += possible_amount * TIME_PER_PCB + (group not in cur_group_to_pcbs) * TIME_PER_SETUP_CHANGE
+                        pcb_dict = cur_group_to_pcbs.setdefault(group, dict())
+                        pcb_dict[pcb] = pcb_dict.get(pcb, 0) + possible_amount
+                        amount -= possible_amount
+                    else:
+                        push_in_ordering()
+                
+                if cur_date > cur_deadline:
+                    break
+            
+            if cur_date > cur_deadline:
                 break
         
-        if slack >= 0:
-            return combination.to_json()                
+        if cur_date <= cur_deadline:
+            if cur_group_to_pcbs != dict():
+                push_in_ordering()
+            return {
+                "combination": combination.to_json(),
+                "production_plan": ordering
+            }
     
     return {"error": "No combination found with enough slack to fit the upcoming orders."}
 
@@ -99,3 +140,15 @@ def PrioritizationChoice():
     before calling the FilterPCBs function.
     """
     return "Do you want to prioritize based on SAP data or your own input? Please specify."
+
+
+if __name__ == "__main__":
+    path_0 = "output/0.json"
+    with open(path_0, "r") as file:
+        solutions = json.load(file)
+    
+    solutions_memory = {
+        "current_solutions": solutions
+    }
+
+    print(PrioritizeBasedOnSAP({}))
