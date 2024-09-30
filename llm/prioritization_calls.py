@@ -6,17 +6,18 @@ import datetime as dt
 import pandas as pd
 from langchain.agents import tool
 
+from algorithms.objects import *
 from llm.prompt_utils import *
 from llm.algorithm_calls import solutions_memory
 
 
-current_date = dt.datetime.strptime("2024-10-04", "%Y-%m-%d")
+current_date = dt.datetime.strptime("2024-10-03", "%Y-%m-%d")
 
 path_to_vbap = "SAP_Data/VBAP.csv"
 
 
 @tool
-def FilterPCBs(important_pcbs):
+def FilterPCBsFromUserInput(important_pcbs):
     """
     Filters the PCB combinations based on user-specified important PCBs.
     Args: 
@@ -53,20 +54,43 @@ def FilterPCBs(important_pcbs):
 def PrioritizeBasedOnSAP():
     """
     Prioritize PCBs based on SAP data (VBAP table). Select PCBs with the closest delivery dates.
-    This function genereated the PCB that should be prioritized and can be used as input for the FilterPCBs function
+    This function generates the PCB that should be prioritized and can be used as input for the FilterPCBs function.
+    
+    Modified to return a list of tuples with PCBs grouped by their delivery date.
     """
     vbap_df = pd.read_csv(path_to_vbap)
     vbap_df["EDATU"] = pd.to_datetime(vbap_df["EDATU"])
+
+    upcoming_orders = vbap_df[(vbap_df["EDATU"] > current_date) & (vbap_df["EDATU"] <= current_date + dt.timedelta(days=7))]
+    upcoming_orders_sorted = upcoming_orders.sort_values(by="EDATU")
     
-    upcoming_orders = vbap_df[vbap_df["EDATU"] > current_date]
-    closest_orders = upcoming_orders.sort_values(by="EDATU").head(5)  # Limit to 5 closest 
+    solutions = solutions_memory.get('current_solutions')
+    if not isinstance(solutions, dict):
+        return {"error": "First optimization should be called before prioritizing PCBs."}
+    combinations = Combinations.from_json(solutions)
     
-    prioritized_pcbs = closest_orders["MATNR"].tolist()
+    for combination in combinations.combinations:
+        slack = int(0)
+        mapping = {pcb.name: group_id for (group_id, group) in enumerate(combination.groups) for pcb in group.pcbs}
+        # TODO: optimize if there is an overlap between different days, and we can start with the same group we left yesterday
+        for date, pcbs, number in upcoming_orders_sorted.groupby("EDATU", as_index=False)[["MATNR", "KWMENG"]].agg(list).itertuples(index=False, name=None):
+            assert isinstance(date, pd.Timestamp)
+            slack += (date.to_pydatetime() - current_date).total_seconds()
+
+            used_groups = {mapping[pcb_name] for pcb_name in pcbs}
+            total_amount = sum(number)
+
+            slack -= len(used_groups) * (2 * 60 * 60)  # 2 hours per group switch
+            slack -= total_amount * (10) # 10 seconds per PCB
+
+            if slack < 0:
+                break
+        
+        if slack >= 0:
+            return combination.to_json()                
     
-    if prioritized_pcbs:
-        return f"PCBs with the delivery dates in descending order: {prioritized_pcbs}. If the Input from the Human doenst match with these tell the Human that there are no open order for the PCBs the Human mentioned."
-    else:
-        return "No upcoming orders found for prioritization."
+    return {"error": "No combination found with enough slack to fit the upcoming orders."}
+
 
 @tool
 def PrioritizationChoice():
