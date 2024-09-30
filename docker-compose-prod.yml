@@ -1,0 +1,25 @@
+version: '2.4'
+services:
+  prod-chatbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8501:8501'
+    mem_limit: 200mb
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    volumes:
+      - './publish/:/app/output/'
+      - './cfg-data/:/cfg-data/'
+    # Network of system apps
+    networks:
+        - proxy-redirect
+
+networks:
+    proxy-redirect:
+        external:
+            name: proxy-redirect
