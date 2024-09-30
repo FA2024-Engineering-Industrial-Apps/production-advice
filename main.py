@@ -81,8 +81,8 @@ DEPLOYING_FUNCTIONS = [func.func.__name__ for func in [
 def display_deploy_button(order: OrderDeployment):
     _, c1 = st.columns([3, 1])
     with c1:
-        if st.button("Deploy", use_container_width=True):
-            print(order.order)
+        if st.button("Send to edge", use_container_width=True):
+            csv_utils.publish_user_data(order.order)
 
 
 if __name__ == "__main__":
