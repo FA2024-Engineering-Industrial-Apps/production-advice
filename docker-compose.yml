@@ -1,16 +1,38 @@
 version: '2.4'
 services:
   prod-chatbot:
-    build: .
-    image: 'prod-chatbot:1.0.0'
-#   platform: linux/arm64
-#   If the user wishes to deploy this app on a ARM based Device ( IoT 2050 , Sclance LPE ...), the option platform that is mentioned in line 6 needs to be uncommented 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - TOPIC=prod-order
+      - MQTT_IP=ie-databus
+      - MQTT_USER=edge
+      - MQTT_PASSWORD=edge
     ports:
       - '8501:8501'
     mem_limit: 200mb
-    # restart: "unless-stopped"
-    logging: 
-      driver: "json-file"
-      options: 
-        max-size: "10m"
-        max-file: "3"
+    volumes:
+      - './publish/:/publish/'
+      - './cfg-data/:/cfg-data/'
+      - './output/:/app/output/'
+    networks:
+      - proxy-redirect
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+  ie-databus: # For local development purposes. Note that preffered databus name changed from 1.0 to 1.1. Legacy old name is "ie_databus".
+    image: eclipse-mosquitto:1.6
+    networks:
+      - proxy-redirect
+  nodered:
+    image: nodered/node-red
+    ports: 
+      - 1880:1880
+    networks:
+      - proxy-redirect
+networks:
+    proxy-redirect:
