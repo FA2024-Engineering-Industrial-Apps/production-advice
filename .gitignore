@@ -3,3 +3,4 @@
 __pycache__
 prod_opt.egg-info
 key.txt
+openai_api.py

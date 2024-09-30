@@ -4,11 +4,14 @@ sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
 from llm.algorithm_calls import *
 from llm.prioritization_calls import *
 from llm.prompt import *
+import os
 
 from langchain_ollama import ChatOllama
+from langchain_openai import OpenAI
 from langchain.agents import AgentExecutor, create_tool_calling_agent, tool
-from langchain_core.messages import HumanMessage, AIMessage
 
+
+openai_api_key = os.getenv("OPENAI_API")
 
 @tool
 def Text2Csv(text):
@@ -23,11 +26,13 @@ def Text2Csv(text):
 # else:
 #     raise RuntimeError("No key.txt provided!")
 
-model = ChatOllama(
-    model="qwen2.5:32b",
-    temperature=0,
+model = OpenAI(
+    model="GPT-4o",
+    temperature=0.2,
     seed=0,
-    base_url="workstation.ferienakademie.de"
+    max_retries=2,
+    api_key=openai_api_key,
+    #base_url="workstation.ferienakademie.de"
 )
 
 tools = [
