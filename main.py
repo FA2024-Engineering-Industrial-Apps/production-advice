@@ -64,11 +64,26 @@ def display_export_button(export: DataExport):
                 file_name=f"export_{export.id}.pdf",
                 key=f"pdf_button_{id}"
             )
-            st.button(
-                label="Deploy to workstation",
-                on_click=lambda: print("Deployment was requested"),
-                key=f"deploy_button_{id}"
-            )
+
+
+@dataclass
+class OrderDeployment:
+    order: dict
+
+    @classmethod
+    def isinstance(cls, obj) -> bool:
+        return type(obj).__name__ == cls.__name__
+
+DEPLOYING_FUNCTIONS = [func.func.__name__ for func in [
+    llmchat.PrioritizeBasedOnSAP,
+]]
+
+def display_deploy_button(order: OrderDeployment):
+    _, c1 = st.columns([3, 1])
+    with c1:
+        if st.button("Deploy", use_container_width=True):
+            print(order.order)
+
 
 if __name__ == "__main__":
     @st.cache_resource
@@ -88,6 +103,9 @@ if __name__ == "__main__":
     def write_message(message):
         if DataExport.isinstance(message):
             display_export_button(message)
+            return
+        elif OrderDeployment.isinstance(message):
+            display_deploy_button(message)
             return
         
         with st.chat_message(message.type):
@@ -150,3 +168,11 @@ if __name__ == "__main__":
                 st.session_state["last_function_run"] = None
                 st.session_state.messages.append(export)
                 write_message(export)
+            elif tool_name in DEPLOYING_FUNCTIONS:
+                order = OrderDeployment(
+                    order=st.session_state["last_order"]
+                )
+                st.session_state["last_order"] = None
+                st.session_state.messages.append(order)
+                write_message(order)
+            

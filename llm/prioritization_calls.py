@@ -10,6 +10,7 @@ from langchain.agents import tool
 from algorithms.objects import *
 from llm.prompt_utils import *
 from llm.algorithm_calls import solutions_memory
+from llm.prompt_utils import *
 
 TIME_PER_SETUP_CHANGE = 2 * 60 * 60
 TIME_PER_PCB = 10
@@ -125,6 +126,11 @@ def PrioritizeBasedOnSAP():
         if cur_date <= cur_deadline:
             if cur_group_to_pcbs != dict():
                 push_in_ordering()
+            
+            cache_order({
+                "production_plan": ordering
+            })
+
             return {
                 "combination": combination.to_json(),
                 "production_plan": ordering
