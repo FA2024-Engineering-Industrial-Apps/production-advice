@@ -92,6 +92,7 @@ def publish_user_data(json_data):
        MQTT_IP = os.environ['MQTT_IP']
        TOPIC = params['TOPIC']
 
+    json_message = json.dumps(json_data)
     # Create the MQTT client instance
     client = mqtt.Client()
     #set username and password, must be created it databus configurator
@@ -101,7 +102,7 @@ def publish_user_data(json_data):
     # Start the MQTT loop in a background thread
     client.loop_start()
     # Publish message to the MQTT broker under the specified topic
-    client.publish(TOPIC, json_data)
+    client.publish(TOPIC, json_message)
     print(f"Published data: {json_data}")
     # Stop the MQTT loop after publishing the message
     client.loop_stop()
