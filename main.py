@@ -5,20 +5,18 @@ from utils.streamlit_utils import *
 import utils.create_csv as csv_utils
 import utils.docker_utils as docker_utils
 
+import pandas as pd
 import os
 import re
 import json
 from dataclasses import dataclass
 from typing import TextIO
 
-
-# @st.cache_data
-# def json_solution_to_tabular_csv(id: int, path: str) -> tuple[str, IO]:
-#     with open(path) as file:
-#         json_data = json.loads(
-#             file.read()
-#         )
-#     return csv_utils.json_solution_to_tabular_csv(id, json_data)
+import streamlit as st
+import pandas as pd
+import json
+import os
+from dataclasses import dataclass
 
 @dataclass
 class DataExport:
@@ -30,15 +28,37 @@ class DataExport:
     @classmethod
     def isinstance(cls, obj) -> bool:
         return type(obj).__name__ == cls.__name__
-    
-    @st.cache_data
-    def get_tabular_csv(self) -> str:
+
+    def __get_json_data(self) -> dict:
         with open(self.path) as file:
             json_data = json.loads(
                 file.read()
             )
-        return csv_utils.json_solution_to_tabular_csv(self.id, json_data)
+        return json_data
 
+    @st.cache_data
+    def get_tabular_csv(self) -> str:
+        """Loads JSON data and returns it as a Pandas DataFrame."""
+        return csv_utils.json_solution_to_tabular_csv(
+            self.id,
+            self.__get_json_data()
+        )
+
+    @st.cache_data
+    def get_tabular_xlsx(self):
+        """Exports the DataFrame to an Excel file."""
+        csv_path = self.get_tabular_csv()
+        df = pd.read_csv(csv_path)
+        df.columns = ["Combination ID", "Group ID", "PCB"]
+
+        xlsx_path = path = os.path.abspath(os.path.join(
+            __file__,
+            os.path.pardir,
+            os.path.pardir,
+            f"output/{self.id}_tabular.xlsx"
+        ))
+        df.to_excel(xlsx_path, index=False)
+        return xlsx_path
 
 EXPORTING_FUNCTIONS = [func.func.__name__ for func in [
     llmchat.CallOptimizer,
@@ -51,19 +71,24 @@ def display_export_button(export: DataExport):
     _, c1 = st.columns([3, 1])
     with c1:
         with c1.popover("Export", use_container_width=True):
-            # TODO: implement buttons functionality
+            # CSV
             tabular_csv_name = export.get_tabular_csv()
             st.download_button(
                 label="Download CSV export",
                 data=open(tabular_csv_name, "r"),
                 file_name=os.path.basename(tabular_csv_name),
+                mime="text/csv",
                 key=f"csv_button_{id}"
             )
+
+            # Excel
+            excel_file_name = export.get_tabular_xlsx()
             st.download_button(
-                label="Download PDF export",
-                data="to be implemented",
-                file_name=f"export_{export.id}.pdf",
-                key=f"pdf_button_{id}"
+                label="Download Excel export",
+                data=open(excel_file_name, "r"),
+                file_name=os.path.basename(excel_file_name),
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                key=f"excel_button_{id}"
             )
 
 
