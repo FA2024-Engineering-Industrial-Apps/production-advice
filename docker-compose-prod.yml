@@ -1,9 +1,7 @@
 version: '2.4'
 services:
   prod-chatbot:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: prod-chatbot:1.0.0
     ports:
       - '8501:8501'
     mem_limit: 200mb
