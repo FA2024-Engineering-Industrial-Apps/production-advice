@@ -3,6 +3,7 @@ import llm.setup as llmchat
 from llm.algorithm_calls import solutions_memory
 from utils.streamlit_utils import *
 import utils.create_csv as csv_utils
+import utils.docker_utils as docker_utils
 
 import os
 import re
@@ -79,9 +80,10 @@ DEPLOYING_FUNCTIONS = [func.func.__name__ for func in [
 ]]
 
 def display_deploy_button(order: OrderDeployment):
+    # TODO: display 2 buttons, if both optimization and prioritization are done
     _, c1 = st.columns([3, 1])
     with c1:
-        if st.button("Send to edge", use_container_width=True):
+        if docker_utils.is_run_in_docker() and st.button("Send to edge", use_container_width=True):
             csv_utils.publish_user_data(order.order)
 
 
@@ -129,6 +131,7 @@ if __name__ == "__main__":
                     st.write(f"Running the model...")
                 else:
                     st.write(f"Rerunning for {number_of_tries}th time...")
+                    # TODO: this should have been a system message
                     st.session_state.messages.append(llmchat.AIMessage("Function execution failed. Remember, that functions accept only JSON input. Please format the user request accordingly."))
                 number_of_tries += 1
 

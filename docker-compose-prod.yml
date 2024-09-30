@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - DOCKER=1
     ports:
       - '8501:8501'
     mem_limit: 200mb
