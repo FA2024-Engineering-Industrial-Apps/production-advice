@@ -15,7 +15,7 @@ def CallOptimizer(PCBnumber):
     """
     Function to optimize the grouping of PCBs for the production line.
     Args: 
-        - PCBnumber: this should either be a a list of PCBs or a single int for one PCBs.
+        - PCBnumber: this should either be a a list of PCBs or a single int for one PCBs. If a range of PCBs should be optimized, expand it as a list of consecutive integers (e.g., 1-5 -> [1, 2, 3, 4, 5]).
     """
     try:
         PCBnumber = sanitize_input(PCBnumber)
