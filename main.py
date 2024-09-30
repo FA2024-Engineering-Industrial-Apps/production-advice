@@ -3,21 +3,18 @@ import llm.setup as llmchat
 from llm.algorithm_calls import solutions_memory
 from utils.streamlit_utils import *
 import utils.create_csv as csv_utils
-
+import pandas as pd
 import os
 import re
 import json
 from dataclasses import dataclass
 from typing import TextIO
 
-
-# @st.cache_data
-# def json_solution_to_tabular_csv(id: int, path: str) -> tuple[str, IO]:
-#     with open(path) as file:
-#         json_data = json.loads(
-#             file.read()
-#         )
-#     return csv_utils.json_solution_to_tabular_csv(id, json_data)
+import streamlit as st
+import pandas as pd
+import json
+import os
+from dataclasses import dataclass
 
 @dataclass
 class DataExport:
@@ -29,15 +26,24 @@ class DataExport:
     @classmethod
     def isinstance(cls, obj) -> bool:
         return type(obj).__name__ == cls.__name__
-    
-    @st.cache_data
-    def get_tabular_csv(self) -> str:
-        with open(self.path) as file:
-            json_data = json.loads(
-                file.read()
-            )
-        return csv_utils.json_solution_to_tabular_csv(self.id, json_data)
 
+    @st.cache_data
+    def get_tabular_data(self) -> pd.DataFrame:
+        """Loads JSON data and returns it as a Pandas DataFrame."""
+        with open(self.path) as file:
+            json_data = json.load(file)
+        
+        csv_file_path = csv_utils.json_solution_to_tabular_csv(self.id, json_data)
+        df = pd.read_csv(csv_file_path)
+
+        df.columns = ['combination', 'group', 'product']
+
+        return df
+
+    def export_to_excel(self, excel_file_path: str):
+        """Exports the DataFrame to an Excel file."""
+        df = self.get_tabular_data()
+        df.to_excel(excel_file_path, index=False)
 
 EXPORTING_FUNCTIONS = [func.func.__name__ for func in [
     llmchat.CallOptimizer,
@@ -50,20 +56,29 @@ def display_export_button(export: DataExport):
     _, c1 = st.columns([3, 1])
     with c1:
         with c1.popover("Export", use_container_width=True):
-            # TODO: implement buttons functionality
-            tabular_csv_name = export.get_tabular_csv()
+            # CSV
+            tabular_csv_name = export.get_tabular_data().to_csv(index=False)
             st.download_button(
                 label="Download CSV export",
-                data=open(tabular_csv_name, "r"),
-                file_name=os.path.basename(tabular_csv_name),
+                data=tabular_csv_name,
+                file_name=f"export_{export.id}.csv",
+                mime="text/csv",
                 key=f"csv_button_{id}"
             )
-            st.download_button(
-                label="Download PDF export",
-                data="to be implemented",
-                file_name=f"export_{export.id}.pdf",
-                key=f"pdf_button_{id}"
-            )
+
+            # Excel
+            excel_file_name = f"export_{export.id}.xlsx"
+            export.export_to_excel(excel_file_name)
+            with open(excel_file_name, "rb") as excel_file:
+                st.download_button(
+                    label="Download Excel export",
+                    data=excel_file,
+                    file_name=excel_file_name,
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    key=f"excel_button_{id}"
+                )
+
+            # Deployment 
             st.button(
                 label="Deploy to workstation",
                 on_click=lambda: print("Deployment was requested"),
@@ -102,7 +117,6 @@ if __name__ == "__main__":
         write_message(human_message)
         response = {}
         with st.status("Thinking...") as status:
-            # In this way the model would have to run algorithm again if the prioritization is requested
             solutions_memory.clear()
 
             number_of_tries = 1
