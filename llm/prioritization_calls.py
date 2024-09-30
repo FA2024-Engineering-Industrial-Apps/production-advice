@@ -1,6 +1,7 @@
 import sys, os.path as path
 sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
 
+from functools import reduce
 import datetime as dt
 
 import pandas as pd
@@ -12,6 +13,8 @@ from llm.algorithm_calls import solutions_memory
 
 TIME_PER_SETUP_CHANGE = 2 * 60 * 60
 TIME_PER_PCB = 10
+TIME_PER_DAY = 8 * 60 * 60
+SETUP_CHANGE = "SETUP_CHANGE"
 
 
 current_date = dt.datetime.strptime("2024-10-03", "%Y-%m-%d")
@@ -58,6 +61,7 @@ def PrioritizeBasedOnSAP():
     """
     Prioritize PCBs based on SAP data (VBAP table). Select PCBs with the closest delivery dates.
     This function generates the PCB that should be prioritized and can be used as input for the FilterPCBs function.
+    Would also return the production plan for the prioritized PCBs.
     
     Modified to return a list of tuples with PCBs grouped by their delivery date.
     """
@@ -75,72 +79,55 @@ def PrioritizeBasedOnSAP():
     sap_plan = [*upcoming_orders_sorted.groupby("EDATU", as_index=False)[["MATNR", "KWMENG"]].agg(list).itertuples(index=False, name=None)]
     
     for combination in combinations.combinations:
-        slack = int(0)
-        prev_date = current_date
+        cur_date = current_date
+        cur_deadline = current_date + dt.timedelta(days=1)
+
+        ordering = []
+        cur_group_to_pcbs: dict[int, dict[str, int]] = dict()
+        cur_working_time = 0
+
+        def push_in_ordering():
+            nonlocal ordering, cur_group_to_pcbs, cur_working_time, cur_date
+            ordering.append({
+                "date": cur_date.strftime("%Y-%m-%d"),
+                "order": reduce(lambda x, y: x + [SETUP_CHANGE] + y, ([*entry.items()] for entry in cur_group_to_pcbs.values()), [])
+            })
+            cur_group_to_pcbs = dict()
+            cur_working_time = 0
+            cur_date += dt.timedelta(days=1)
+
         mapping = {pcb.name: group_id for (group_id, group) in enumerate(combination.groups) for pcb in group.pcbs}
-        # TODO: optimize if there is an overlap between different days, and we can start with the same group we left yesterday
         for date, pcbs, number in sap_plan:
             assert isinstance(date, pd.Timestamp)
-            slack += (date.to_pydatetime() - prev_date).total_seconds()
-            prev_date = date.to_pydatetime()
+            cur_deadline = date.to_pydatetime()
 
-            used_groups = {mapping[pcb_name] for pcb_name in pcbs}
-            total_amount = sum(number)
+            for pcb, amount in sorted(zip(pcbs, number), key=lambda x: mapping[x[0]]):
+                group = mapping[pcb]
+                while amount > 0:
+                    if cur_date > cur_deadline:
+                        break
 
-            slack -= len(used_groups) * TIME_PER_SETUP_CHANGE
-            slack -= total_amount * TIME_PER_PCB
-
-            if slack < 0:
+                    possible_amount = max(0, min(amount, (TIME_PER_DAY - cur_working_time - (group not in cur_group_to_pcbs) * TIME_PER_SETUP_CHANGE) // TIME_PER_PCB))
+                    if possible_amount > 0:
+                        cur_working_time += possible_amount * TIME_PER_PCB + (group not in cur_group_to_pcbs) * TIME_PER_SETUP_CHANGE
+                        pcb_dict = cur_group_to_pcbs.setdefault(group, dict())
+                        pcb_dict[pcb] = pcb_dict.get(pcb, 0) + possible_amount
+                        amount -= possible_amount
+                    else:
+                        push_in_ordering()
+                
+                if cur_date > cur_deadline:
+                    break
+            
+            if cur_date > cur_deadline:
                 break
         
-        if slack >= 0:
-            mapping = {pcb.name: group_id for (group_id, group) in enumerate(combination.groups) for pcb in group.pcbs}
-            slack = int(0)
-
-            days_stack = []
-            prev_date = current_date
-            cur_date = None
-
-            current_order = []
-            current_group = None
-
-            orderding = []
-
-            for date, pcbs, number in sap_plan:
-                assert isinstance(date, pd.Timestamp)
-                days_stack.append(date.to_pydatetime())
-                
-                for pcb, amount in sorted(zip(pcbs, number), key=lambda x: mapping[x[0]]):
-                    delta = ((current_group != mapping[pcb]) * TIME_PER_SETUP_CHANGE) + (amount * TIME_PER_PCB)
-                    if delta > slack:
-                        orderding.append({
-                            "date": cur_date,
-                            "order": current_order
-                        })
-                        
-                        current_group = None
-                        delta = ((current_group != mapping[pcb]) * TIME_PER_SETUP_CHANGE) + (amount * TIME_PER_PCB)
-                        while slack < delta:
-                            cur_date = days_stack.pop(0)
-                            slack += int((cur_date - prev_date).total_seconds())
-                            prev_date = cur_date
-                        current_order = []
-                    
-                    slack -= delta
-                    if current_group != mapping[pcb]:
-                        current_group = mapping[pcb]
-                        current_order.append("SETUP_CHANGE")
-                    current_order.append(pcb)
-            
-            if current_order:
-                orderding.append({
-                    "date": cur_date.strftime("%Y-%m-%d"),
-                    "order": current_order
-                })
-
+        if cur_date <= cur_deadline:
+            if cur_group_to_pcbs != dict():
+                push_in_ordering()
             return {
                 "combination": combination.to_json(),
-                "production_plan": orderding[1:]
+                "production_plan": ordering
             }
     
     return {"error": "No combination found with enough slack to fit the upcoming orders."}
