@@ -21,6 +21,10 @@ def save_output(json_output: dict):
         os.path.pardir,
         f"output/{id}.json"
     ))
+    os.makedirs(
+        os.path.dirname(path),
+        exist_ok=True
+    )
     with open(path, "w") as file:
         file.write(json.dumps(json_output))
 
