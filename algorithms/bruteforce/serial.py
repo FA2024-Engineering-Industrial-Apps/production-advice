@@ -197,6 +197,7 @@ def call_list(input_pcb_list):
     :param list or number of PCBs
     :return json dictionary containing the groups and materials required for the production process
     """
+    print(input_pcb_list)
     if type(input_pcb_list)==type(1):
         input_pcb_list = [input_pcb_list]
     if len(input_pcb_list) <= 0: 
