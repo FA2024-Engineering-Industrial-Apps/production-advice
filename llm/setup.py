@@ -45,11 +45,9 @@ tools = [
     CallOptimizer,
     CallHybridOptimizer,
     CallParallelOptimizer,
-    FilterPCBsFromUserInput,
-    #FilterPCBsFromSAPPrioritization,
+    SelectOneOptimalPCB,
     Text2Csv,
-    PrioritizeBasedOnSAP,
-    PrioritizationChoice
+    PrioritizeBasedOnSAP
 ]
 agent = create_tool_calling_agent(model, tools, prompt)
 
