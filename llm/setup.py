@@ -43,6 +43,7 @@ model = ChatOllama(
 
 tools = [
     CallOptimizer,
+    CallSerialOptimizer,
     CallHybridOptimizer,
     CallParallelOptimizer,
     SelectOneOptimalPCB,

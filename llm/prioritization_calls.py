@@ -45,7 +45,8 @@ def PrioritizeBasedOnSAP():
     This function generates the PCB that should be prioritized and can be used as input for the FilterPCBs function.
     Would also return the production plan for the prioritized PCBs.
     
-    Modified to return a list of tuples with PCBs grouped by their delivery date.
+    Returns:
+        - a list of tuples with PCBs grouped by their delivery date.
     """
     vbap_df = pd.read_csv(path_to_vbap)
     vbap_df["EDATU"] = pd.to_datetime(vbap_df["EDATU"])
