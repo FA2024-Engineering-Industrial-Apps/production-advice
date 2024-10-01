@@ -36,6 +36,7 @@ def cache_order(order: dict):
 def check_n_of_combinations(json_data):
     n = len(json_data['combinations'])
     if n > 3:
-        return f"More than 3 optimal solutions found. The number of combinations is {n}. Would you like to prioritize specific PCBs based on SAP data?"
+        return f"More than 3 optimal solutions found. The number of combinations is {n}. " + \
+            "Would you like to use SAP data to select the suitable combination? Or maybe you want to see one of the combinations?"
     else:
         return json_data
