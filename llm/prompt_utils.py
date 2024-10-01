@@ -32,3 +32,10 @@ def save_output(json_output: dict):
 
 def cache_order(order: dict):
     st.session_state["last_order"] = order
+
+def check_n_of_combinations(json_data):
+    n = len(json_data['combinations'])
+    if n > 3:
+        return f"More than 3 optimal solutions found. The number of combinations is {n}. Would you like to prioritize specific PCBs based on SAP data?"
+    else:
+        return json_data
