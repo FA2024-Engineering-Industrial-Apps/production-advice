@@ -80,7 +80,7 @@ class MessageButton:
             tabular_csv_name = export.get_tabular_csv()
             st.download_button(
                 label="Download CSV export",
-                data=open(tabular_csv_name, "r"),
+                data=open(tabular_csv_name, "rb"),
                 file_name=os.path.basename(tabular_csv_name),
                 mime="text/csv",
                 key=f"csv_button_{id}"
@@ -90,7 +90,7 @@ class MessageButton:
             excel_file_name = export.get_tabular_xlsx()
             st.download_button(
                 label="Download Excel export",
-                data=open(excel_file_name, "r"),
+                data=open(excel_file_name, "rb"),
                 file_name=os.path.basename(excel_file_name),
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 key=f"excel_button_{id}"
