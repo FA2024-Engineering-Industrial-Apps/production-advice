@@ -32,9 +32,9 @@ def SelectOneOptimalPCB():
         - one optimal pcb combination.
     """
     solutions = solutions_memory.get('current_solutions')
+    if not solutions or not isinstance(solutions, dict):
+        return {"error": "First optimization should be called before prioritizing PCBs."}
     
-    if not solutions:
-        return "No solutions available to filter."
     return solutions['combinations'][0]
 
 
