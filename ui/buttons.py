@@ -1,3 +1,6 @@
+import sys, os.path as path
+sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
+
 import utils.create_csv as csv_utils
 import utils.docker_utils as docker_utils
 import llm.setup as llmchat
@@ -19,7 +22,7 @@ class DataExport:
         self.id = int(os.path.basename(self.path)[:-len(".json")])
 
     def __get_json_data(self) -> dict:
-        with open(self.path, encoding="utf-8") as file:
+        with open(self.path) as file:
             json_data = json.load(file)
         return json_data
 
@@ -83,7 +86,8 @@ class MessageButton:
                 data=open(tabular_csv_name, "rb"),
                 file_name=os.path.basename(tabular_csv_name),
                 mime="text/csv",
-                key=f"csv_button_{id}"
+                key=f"csv_button_{id}",
+                use_container_width=True
             )
 
             # Excel
@@ -93,7 +97,8 @@ class MessageButton:
                 data=open(excel_file_name, "rb"),
                 file_name=os.path.basename(excel_file_name),
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                key=f"excel_button_{id}"
+                key=f"excel_button_{id}",
+                use_container_width=True
             )
 
     def __display_deploy_button(self, column: DeltaGenerator):
