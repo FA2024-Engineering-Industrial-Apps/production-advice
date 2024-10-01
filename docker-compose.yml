@@ -9,9 +9,10 @@ services:
       - MQTT_IP=ie-databus
       - MQTT_USER=edge
       - MQTT_PASSWORD=edge
+      - DOCKER=1
     ports:
       - '8501:8501'
-    mem_limit: 200mb
+    mem_limit: 200mb # TODO: I don't think it is enough memory for the chatbot
     volumes:
       - './publish/:/publish/'
       - './cfg-data/:/cfg-data/'

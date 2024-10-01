@@ -45,7 +45,6 @@ def json_solution_to_tabular_csv(file_id: int, json_data: dict) -> str:
         os.path.pardir,
         f"output/{file_id}_tabular.csv"
     ))
-    publish_user_data(json_data)
 
     with open(path, "w") as file:
         writer = csv.writer(file, lineterminator="\n")

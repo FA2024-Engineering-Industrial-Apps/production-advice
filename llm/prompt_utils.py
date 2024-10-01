@@ -29,3 +29,6 @@ def save_output(json_output: dict):
         file.write(json.dumps(json_output))
 
     st.session_state["last_function_run"] = path
+
+def cache_order(order: dict):
+    st.session_state["last_order"] = order
