@@ -13,7 +13,7 @@ import os
 from typing import Optional
 from dataclasses import dataclass
 
-
+XLSX_MAX_ROWS = 10485
 @dataclass
 class DataExport:
     path: str
@@ -41,12 +41,16 @@ class DataExport:
         df = pd.read_csv(csv_path)
         df.columns = ["Combination ID", "Group ID", "PCB"]
 
-        xlsx_path = path = os.path.abspath(os.path.join(
+        self.number_of_rows = len(df.index)
+        self.xlsx_overflow = self.number_of_rows > XLSX_MAX_ROWS
+
+        xlsx_path = os.path.abspath(os.path.join(
             __file__,
             os.path.pardir,
             os.path.pardir,
             f"output/{self.id}_tabular.xlsx"
         ))
+        df = df.head(min(self.number_of_rows, XLSX_MAX_ROWS))
         df.to_excel(xlsx_path, index=False)
         return xlsx_path
 
@@ -73,6 +77,39 @@ class MessageButton:
     @classmethod
     def isinstance(cls, obj) -> bool:
         return type(obj).__name__ == cls.__name__
+    
+    def __show_excel_download_button(self, excel_file_name: str, id: int, label: str, key: str):
+        st.download_button(
+            label=label,
+            data=open(excel_file_name, "rb"),
+            file_name=os.path.basename(excel_file_name),
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key=f"excel_button_{id}_{key}",
+            use_container_width=True
+        )
+    
+    def __show_csv_download_button(self, csv_file_name: str, id: int, label: str, key: str):
+        st.download_button(
+            label=label,
+            data=open(csv_file_name, "rb"),
+            file_name=os.path.basename(csv_file_name),
+            mime="text/csv",
+            key=f"csv_button_{id}_{key}",
+            use_container_width=True
+        )
+    
+    @st.dialog("Too many combinations", width="large")
+    def __display_excel_overflow_warning(self, tabular_csv_name: str, tabular_xlsx_name: str, id: int):
+        assert self.export_button is not None
+        st.write(
+            f"Warning, Excel spreadsheets do not support than {XLSX_MAX_ROWS} rows. Current groupping result contains {self.export_button.number_of_rows} rows." +
+            f"Only the first {XLSX_MAX_ROWS} rows will be exported. If you need the full result, please download the CSV file."
+        )
+        c1, c2 = st.columns([1, 1])
+        with c1:
+            self.__show_excel_download_button(tabular_xlsx_name, id, "Download Excel export anyway", "overflow")
+        with c2:
+            self.__show_csv_download_button(tabular_csv_name, id, "Download full CSV export", "overflow")
 
     def __display_export_button(self, column: DeltaGenerator):
         export = self.export_button
@@ -81,25 +118,15 @@ class MessageButton:
         with column.popover("Export", use_container_width=True):
             # CSV
             tabular_csv_name = export.get_tabular_csv()
-            st.download_button(
-                label="Download CSV export",
-                data=open(tabular_csv_name, "rb"),
-                file_name=os.path.basename(tabular_csv_name),
-                mime="text/csv",
-                key=f"csv_button_{id}",
-                use_container_width=True
-            )
+            self.__show_csv_download_button(tabular_csv_name, id, "Download CSV export", "normal")
 
             # Excel
             excel_file_name = export.get_tabular_xlsx()
-            st.download_button(
-                label="Download Excel export",
-                data=open(excel_file_name, "rb"),
-                file_name=os.path.basename(excel_file_name),
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                key=f"excel_button_{id}",
-                use_container_width=True
-            )
+            if export.xlsx_overflow:
+                if st.button("Download Excel export"):
+                    self.__display_excel_overflow_warning(tabular_csv_name, excel_file_name, id)
+            else:
+                self.__show_excel_download_button(excel_file_name, id, "Download Excel export", "normal")
 
     def __display_deploy_button(self, column: DeltaGenerator):
         order = self.deploy_button
