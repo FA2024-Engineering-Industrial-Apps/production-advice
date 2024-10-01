@@ -1,3 +1,6 @@
+import sys, os.path as path
+sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
+
 import os
 import re
 import time
@@ -5,6 +8,9 @@ import json
 import csv
 from typing import TextIO
 import paho.mqtt.client as mqtt
+
+from utils import docker_utils
+
 
 def read_parameter(jsonfile):
     with open(jsonfile) as params:
@@ -66,16 +72,14 @@ def json_solution_to_tabular_csv(file_id: int, json_data: dict) -> str:
 
 
 
-def publish_user_data(json_data):
-    #Use this incase we decide to seperate container for the LLM setup
-    # def on_connect(client, userdata, flags, rc):
-    #     """Callback function when connected to the broker."""
-    #     if rc == 0:
-    #         print("Connected to broker successfully")
-    #     else:
-    #         print(f"Failed to connect, return code {rc}")
-# Attach the on_connect callback function
-    # client.on_connect = on_connect
+def publish_user_data(json_data) -> str:
+    """
+        Returns the result message
+    """
+
+    if not docker_utils.is_run_in_docker():
+        return "Can only deploy to edge when run inside a docker container"
+
     try:
        params = read_parameter('/cfg-data/mqtt-config.json')
        MQTT_USER = params['MQTT_USER']
@@ -83,7 +87,7 @@ def publish_user_data(json_data):
        MQTT_IP = params['MQTT_IP']
        TOPIC = params['TOPIC']
 
-# If no config file exists e.g in standalone application, configure with environment variables
+    # If no config file exists e.g in standalone application, configure with environment variables
     except:
        print("Warning, using default environment values because reading config json file failed")
        MQTT_USER = os.environ['MQTT_USER']
@@ -107,3 +111,5 @@ def publish_user_data(json_data):
     client.loop_stop()
     # Disconnect from the broker
     client.disconnect()
+
+    return "Production plan is successfully sent to the edge."

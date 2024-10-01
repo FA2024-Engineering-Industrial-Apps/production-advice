@@ -131,18 +131,18 @@ class MessageButton:
     def __display_deploy_button(self, column: DeltaGenerator):
         order = self.deploy_button
         assert order is not None
-        if docker_utils.is_run_in_docker() and column.button("Send to edge", use_container_width=True):
-            csv_utils.publish_user_data(order.order)
+        if column.button("Send to edge", use_container_width=True):
+            result_message = csv_utils.publish_user_data(order.order)
+            st.toast(result_message)
     
     def display(self):
-        can_use_deploy = docker_utils.is_run_in_docker() and self.deploy_button is not None
-        if (self.export_button is not None) != (can_use_deploy):
+        if (self.export_button is not None) != (self.deploy_button is not None):
             _, c1 = st.columns([3, 1])
-            if can_use_deploy:
+            if self.deploy_button is not None:
                 self.__display_deploy_button(c1)
             else:
                 self.__display_export_button(c1)
-        elif (self.export_button is not None) and (can_use_deploy):
+        elif (self.export_button is not None) and (self.deploy_button is not None):
             _, c1, c2 = st.columns([3, 1, 1])
             self.__display_export_button(c1)
             self.__display_deploy_button(c2)
