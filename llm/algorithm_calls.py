@@ -31,10 +31,7 @@ def CallOptimizer(ListOfPCBsNumbers):
     solutions_memory['current_solutions'] = json_data
     save_output(json_data)
     try:
-        if len(json_data['combinations']) > 4:
-            return f"More than 4 optimal solutions found. Would you like to prioritize specific PCBs?"
-        else:
-            return json_data
+        return check_n_of_combinations(json_data)
     except:
         return json_data
 
