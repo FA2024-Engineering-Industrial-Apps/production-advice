@@ -22,8 +22,10 @@ def CallOptimizer(ListOfPCBsNumbers):
     try:
         ListOfPCBsNumbers = sanitize_input(ListOfPCBsNumbers)
         if len(ListOfPCBsNumbers) <= 15:
+            print("Serial optimization is used for less than 15 PCBs")
             json_data = call_list(ListOfPCBsNumbers)
         else:
+            print("Hybrid optimization is used for more than 15 PCBs")
             json_data = call_list_hybrid(ListOfPCBsNumbers)
     except:
         return "Incorrect function parameters are provided: PCBnumber: this should either be a a list of PCBs or a single int for one PCBs"
