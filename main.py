@@ -2,114 +2,9 @@ import streamlit as st
 import llm.setup as llmchat
 from llm.algorithm_calls import solutions_memory
 from utils.streamlit_utils import *
-import utils.create_csv as csv_utils
-import utils.docker_utils as docker_utils
+from ui.buttons import EXPORTING_FUNCTIONS, DEPLOYING_FUNCTIONS, MessageButton, DataExport, OrderDeployment
 
-import pandas as pd
-import os
 import re
-import json
-from dataclasses import dataclass
-from typing import TextIO
-
-import streamlit as st
-import pandas as pd
-import json
-import os
-from dataclasses import dataclass
-
-@dataclass
-class DataExport:
-    path: str
-
-    def __post_init__(self):
-        self.id = int(os.path.basename(self.path)[:-len(".json")])
-
-    @classmethod
-    def isinstance(cls, obj) -> bool:
-        return type(obj).__name__ == cls.__name__
-
-    def __get_json_data(self) -> dict:
-        with open(self.path) as file:
-            json_data = json.loads(
-                file.read()
-            )
-        return json_data
-
-    @st.cache_data
-    def get_tabular_csv(self) -> str:
-        """Loads JSON data and returns it as a Pandas DataFrame."""
-        return csv_utils.json_solution_to_tabular_csv(
-            self.id,
-            self.__get_json_data()
-        )
-
-    @st.cache_data
-    def get_tabular_xlsx(self):
-        """Exports the DataFrame to an Excel file."""
-        csv_path = self.get_tabular_csv()
-        df = pd.read_csv(csv_path)
-        df.columns = ["Combination ID", "Group ID", "PCB"]
-
-        xlsx_path = path = os.path.abspath(os.path.join(
-            __file__,
-            os.path.pardir,
-            os.path.pardir,
-            f"output/{self.id}_tabular.xlsx"
-        ))
-        df.to_excel(xlsx_path, index=False)
-        return xlsx_path
-
-EXPORTING_FUNCTIONS = [func.func.__name__ for func in [
-    llmchat.CallOptimizer,
-    llmchat.CallHybridOptimizer,
-    llmchat.CallParallelOptimizer,
-]]
-
-def display_export_button(export: DataExport):
-    id = export.id
-    _, c1 = st.columns([3, 1])
-    with c1:
-        with c1.popover("Export", use_container_width=True):
-            # CSV
-            tabular_csv_name = export.get_tabular_csv()
-            st.download_button(
-                label="Download CSV export",
-                data=open(tabular_csv_name, "r"),
-                file_name=os.path.basename(tabular_csv_name),
-                mime="text/csv",
-                key=f"csv_button_{id}"
-            )
-
-            # Excel
-            excel_file_name = export.get_tabular_xlsx()
-            st.download_button(
-                label="Download Excel export",
-                data=open(excel_file_name, "r"),
-                file_name=os.path.basename(excel_file_name),
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                key=f"excel_button_{id}"
-            )
-
-
-@dataclass
-class OrderDeployment:
-    order: dict
-
-    @classmethod
-    def isinstance(cls, obj) -> bool:
-        return type(obj).__name__ == cls.__name__
-
-DEPLOYING_FUNCTIONS = [func.func.__name__ for func in [
-    llmchat.PrioritizeBasedOnSAP,
-]]
-
-def display_deploy_button(order: OrderDeployment):
-    # TODO: display 2 buttons, if both optimization and prioritization are done
-    _, c1 = st.columns([3, 1])
-    with c1:
-        if docker_utils.is_run_in_docker() and st.button("Send to edge", use_container_width=True):
-            csv_utils.publish_user_data(order.order)
 
 
 if __name__ == "__main__":
@@ -128,13 +23,10 @@ if __name__ == "__main__":
     st.title("Hello Production!")
 
     def write_message(message):
-        if DataExport.isinstance(message):
-            display_export_button(message)
+        if MessageButton.isinstance(message):
+            message.display()
             return
-        elif OrderDeployment.isinstance(message):
-            display_deploy_button(message)
-            return
-        
+
         with st.chat_message(message.type):
             st.markdown(message.content)
 
@@ -169,7 +61,7 @@ if __name__ == "__main__":
                         "input": prompt,
                         "chat_history": [
                             msg for msg in st.session_state.messages
-                                if not DataExport.isinstance(msg)
+                                if not MessageButton.isinstance(msg)
                         ],
                     },
                     config={
@@ -187,20 +79,29 @@ if __name__ == "__main__":
         # Displaying download button if needed
         if "intermediate_steps" in response and len(response["intermediate_steps"]) > 0 and \
                 "last_function_run" in st.session_state and st.session_state["last_function_run"] is not None:
-            last_step = response["intermediate_steps"][-1]
-            tool_name = last_step[0].tool
-            if tool_name in EXPORTING_FUNCTIONS:
-                export = DataExport(
-                    path=st.session_state["last_function_run"]
-                )
-                st.session_state["last_function_run"] = None
-                st.session_state.messages.append(export)
-                write_message(export)
-            elif tool_name in DEPLOYING_FUNCTIONS:
-                order = OrderDeployment(
-                    order=st.session_state["last_order"]
-                )
-                st.session_state["last_order"] = None
-                st.session_state.messages.append(order)
-                write_message(order)
+            export = None
+            order = None
+            for step in response["intermediate_steps"]:
+                if isinstance(step, tuple) and len(step) == 2 and hasattr(step[0], "tool"):
+                    tool_name = step[0].tool
+                else:
+                    continue
+
+                if tool_name in EXPORTING_FUNCTIONS:
+                    export = DataExport(
+                        path=st.session_state["last_function_run"]
+                    )
+                    st.session_state["last_function_run"] = None
+                elif tool_name in DEPLOYING_FUNCTIONS:
+                    order = OrderDeployment(
+                        order=st.session_state["last_order"]
+                    )
+                    st.session_state["last_order"] = None
+            
+            message_button = MessageButton(
+                export_button=export,
+                deploy_button=order
+            )
+            st.session_state.messages.append(message_button)
+            write_message(message_button)
             
