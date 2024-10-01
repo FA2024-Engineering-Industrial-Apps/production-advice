@@ -114,6 +114,7 @@ def PrioritizeBasedOnSAP():
             })
 
             return {
+                "explanation": f"There are only {len(combination.groups)} SETUP_CHANGEs, which happen in between the PCBs from different groups or different days.",
                 "combination": combination.to_json(),
                 "production_plan": ordering
             }

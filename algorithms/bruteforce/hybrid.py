@@ -180,7 +180,7 @@ def call_list_hybrid(input_pcb_list):
         json_data["groups"].append({
             "group_id": group_id,
             "PCBs": group_pcbs,
-            "materials": list(group_materials)  
+            # "materials": list(group_materials)  
         })
     
     return json_data
