@@ -1,16 +1,12 @@
 # Production Advice
 
-PLEASE PROVIDE THE ENDPOINT URL NAME IN `key.txt`.
-
 ## Running the code
 
 ### Locally
 `python -m streamlit run .\main.py`
 
-## Docker
-```docker build -t production .```
-
-```docker run -p 8501:8501 production```
+### Docker
+```docker compose up --build```
 
 ## Some guides
 
