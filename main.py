@@ -81,7 +81,8 @@ if __name__ == "__main__":
                 "last_function_run" in st.session_state and st.session_state["last_function_run"] is not None:
             export = None
             order = None
-            for step in response["intermediate_steps"]:
+            num_steps = len(response["intermediate_steps"])
+            for i, step in enumerate(response["intermediate_steps"]):
                 if isinstance(step, tuple) and len(step) == 2 and hasattr(step[0], "tool"):
                     tool_name = step[0].tool
                 else:
@@ -92,7 +93,7 @@ if __name__ == "__main__":
                         path=st.session_state["last_function_run"]
                     )
                     st.session_state["last_function_run"] = None
-                elif tool_name in DEPLOYING_FUNCTIONS:
+                elif i == (num_steps - 1) and tool_name in DEPLOYING_FUNCTIONS:
                     order = OrderDeployment(
                         order=st.session_state["last_order"]
                     )
