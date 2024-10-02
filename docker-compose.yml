@@ -17,7 +17,6 @@ services:
     mem_limit: 200mb # TODO: I don't think it is enough memory for the chatbot
     volumes:
       - './publish/:/publish/'
-      - './cfg-data/:/cfg-data/'
       - './output/:/app/output/'
     networks:
       - proxy-redirect
@@ -26,6 +25,18 @@ services:
       options:
         max-size: 10m
         max-file: '3'
+
+  machine-emulator:
+    build:
+      context: ./
+      dockerfile: ./machine_emulator/Dockerfile
+    environment:
+      - DOCKER=1
+    ports:
+      - '8502:8502'
+    networks:
+      - proxy-redirect
+
   nodered:
     image: nodered/node-red
     ports: 

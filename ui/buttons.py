@@ -2,7 +2,7 @@ import sys, os.path as path
 sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
 
 import utils.create_csv as csv_utils
-import utils.docker_utils as docker_utils
+import mqtt.connection as mqtt_connection
 import llm.setup as llmchat
 
 import streamlit as st
@@ -132,7 +132,7 @@ class MessageButton:
         order = self.deploy_button
         assert order is not None
         if column.button("Send to edge", use_container_width=True):
-            result_message = csv_utils.publish_user_data(order.order)
+            result_message = mqtt_connection.publish_user_data(order.order)
             st.toast(result_message)
     
     def display(self):

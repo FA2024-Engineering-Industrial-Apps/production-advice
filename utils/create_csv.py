@@ -4,18 +4,9 @@ sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
 import os
 import re
 import time
-import json
 import csv
-from typing import TextIO
-import paho.mqtt.client as mqtt
-
-from utils import docker_utils
 
 
-def read_parameter(jsonfile):
-    with open(jsonfile) as params:
-        data = json.load(params)
-        return data
 # Function to generate CSV from given input and save with timestamped filename
 def create_csv_from_input(input_data):
     # Split the input data by lines and process each line
@@ -69,47 +60,3 @@ def json_solution_to_tabular_csv(file_id: int, json_data: dict) -> str:
             )
     
     return path
-
-
-
-def publish_user_data(json_data) -> str:
-    """
-        Returns the result message
-    """
-
-    if not docker_utils.is_run_in_docker():
-        return "Can only deploy to edge when run inside a docker container"
-
-    try:
-       params = read_parameter('/cfg-data/mqtt-config.json')
-       MQTT_USER = params['MQTT_USER']
-       MQTT_PASSWORD = params['MQTT_PASSWORD']
-       MQTT_IP = params['MQTT_IP']
-       TOPIC = params['TOPIC']
-
-    # If no config file exists e.g in standalone application, configure with environment variables
-    except:
-       print("Warning, using default environment values because reading config json file failed")
-       MQTT_USER = os.environ['MQTT_USER']
-       MQTT_PASSWORD = os.environ['MQTT_PASSWORD']
-       MQTT_IP = os.environ['MQTT_IP']
-       TOPIC = params['TOPIC']
-
-    json_message = json.dumps(json_data)
-    # Create the MQTT client instance
-    client = mqtt.Client()
-    #set username and password, must be created it databus configurator
-    client.username_pw_set(MQTT_USER,MQTT_PASSWORD)
-    # Connect to the MQTT broker
-    client.connect(MQTT_IP)
-    # Start the MQTT loop in a background thread
-    client.loop_start()
-    # Publish message to the MQTT broker under the specified topic
-    client.publish(TOPIC, json_message)
-    print(f"Published data: {json_data}")
-    # Stop the MQTT loop after publishing the message
-    client.loop_stop()
-    # Disconnect from the broker
-    client.disconnect()
-
-    return "Production plan is successfully sent to the edge."
