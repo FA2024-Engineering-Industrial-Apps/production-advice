@@ -56,6 +56,7 @@ class DataExport:
 
 EXPORTING_FUNCTIONS = [func.func.__name__ for func in [
     llmchat.CallOptimizer,
+    llmchat.CallSerialOptimizer,
     llmchat.CallHybridOptimizer,
     llmchat.CallParallelOptimizer,
 ]]

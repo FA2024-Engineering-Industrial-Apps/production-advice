@@ -77,8 +77,7 @@ if __name__ == "__main__":
         st.session_state.messages.append(llmchat.AIMessage(output))
 
         # Displaying download button if needed
-        if "intermediate_steps" in response and len(response["intermediate_steps"]) > 0 and \
-                "last_function_run" in st.session_state and st.session_state["last_function_run"] is not None:
+        if "intermediate_steps" in response and len(response["intermediate_steps"]) > 0:
             export = None
             order = None
             num_steps = len(response["intermediate_steps"])
