@@ -1,0 +1,11 @@
+version: '2.4'
+services:
+  ie-databus: # For local development purposes. Note that preffered databus name changed from 1.0 to 1.1. Legacy old name is "ie_databus".
+    image: eclipse-mosquitto:1.6
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    networks:
+      - proxy-redirect
+networks:
+    proxy-redirect:

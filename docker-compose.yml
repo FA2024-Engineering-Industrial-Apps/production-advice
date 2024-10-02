@@ -1,4 +1,6 @@
 version: '2.4'
+include:
+  - docker-compose-eclipse-mosquitto.yml
 services:
   prod-chatbot:
     build:
@@ -24,11 +26,6 @@ services:
       options:
         max-size: 10m
         max-file: '3'
-
-  ie-databus: # For local development purposes. Note that preffered databus name changed from 1.0 to 1.1. Legacy old name is "ie_databus".
-    image: eclipse-mosquitto:1.6
-    networks:
-      - proxy-redirect
   nodered:
     image: nodered/node-red
     ports: 
