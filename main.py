@@ -30,8 +30,18 @@ if __name__ == "__main__":
         with st.chat_message(message.type):
             st.markdown(message.content)
 
+    # Displaying messages
     for message in st.session_state["messages"]:
         write_message(message)
+
+    
+    @st.dialog("Edit SAP data", width="large")
+    def edit_sap_data():
+        st.write("Edit SAP data here")
+
+    # Displaying side bar
+    st.sidebar.title("Options")
+    st.sidebar.button("✏️ Edit SAP data", on_click=edit_sap_data)
 
     if prompt := st.chat_input():
         human_message = llmchat.HumanMessage(prompt)
