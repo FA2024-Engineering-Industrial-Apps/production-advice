@@ -150,12 +150,14 @@ if __name__ == "__main__":
                 else:
                     continue
 
-                if tool_name in EXPORTING_FUNCTIONS:
+                if tool_name in EXPORTING_FUNCTIONS and \
+                        "last_function_run" in st.session_state and st.session_state["last_function_run"]:
                     export = DataExport(
                         path=st.session_state["last_function_run"]
                     )
                     st.session_state["last_function_run"] = None
-                elif i == (num_steps - 1) and tool_name in DEPLOYING_FUNCTIONS:
+                elif i == (num_steps - 1) and tool_name in DEPLOYING_FUNCTIONS and \
+                        "last_order" in st.session_state and st.session_state["last_order"]:
                     order = OrderDeployment(
                         order=st.session_state["last_order"]
                     )
