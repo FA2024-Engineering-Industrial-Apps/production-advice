@@ -45,7 +45,7 @@ def is_valid_group(group, pcb_data_dict, material_catalogue_dict, C_max):
 
     return True                                            # if the total capacity is within the allowed maximum, the group is valid
 
-def generate_combinations(pcbs, pcb_data_dict, material_catalogue_dict, C_max, current_groups=[],min_groups=[float('inf')]):
+def generate_combinations(pcbs, pcb_data_dict, material_catalogue_dict, C_max, current_groups, min_groups):
     '''
     This function generates combinations of PCBs based on their total required slot width.
     It aims to find the minimum number of groups such that the combined slot width of PCBs in each group does not exceed C_max.
@@ -94,7 +94,7 @@ def worker(min_group, pcb_list, pcb_data_dict, material_catalogue_dict, C_max, s
     :param lock: Lock object to ensure thread-safe access to shared_mingp.
     """
     try:
-        if next(generate_combinations(pcb_list, pcb_data_dict, material_catalogue_dict, C_max, min_groups=[min_group])):    # attempt to generate combinations with the given min_group
+        if next(generate_combinations(pcb_list, pcb_data_dict, material_catalogue_dict, C_max, current_groups=[], min_groups=[min_group])):    # attempt to generate combinations with the given min_group
 
             with lock:                                                              # If a valid combination is found, update the shared_mingp if the current min_group is smaller
                 if min_group < shared_mingp.value:
