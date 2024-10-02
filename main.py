@@ -28,6 +28,7 @@ if __name__ == "__main__":
         ]
         st.session_state["id"] = get_session()
         st.session_state["vbap_data"] = get_default_vbap_data()
+        st.session_state["old_vbap_data"] = get_default_vbap_data()
 
     st.title("Hello Production!")
 
@@ -118,6 +119,7 @@ if __name__ == "__main__":
                     st.write(f"Using {function_name}...")
                     st.markdown(f"\t`{function_arguments}`")
 
+                # Filtering out old results
                 filtered_history = []
                 prev_msg = None
                 was_last_result = False
@@ -132,6 +134,12 @@ if __name__ == "__main__":
                             filtered_history.append(llmchat.SystemMessage("<llm correctly answered the previous question so it was excluded from the history>"))
                     prev_msg = msg
                 filtered_history = list(reversed(filtered_history))
+
+                # Saying llm, if there is update to sap table
+                if not st.session_state["old_vbap_data"].equals(st.session_state["vbap_data"]):
+                    st.session_state["old_vbap_data"] = st.session_state["vbap_data"]
+                    filtered_history.append(llmchat.SystemMessage("<user updated sap table>"))
+                
                 print(filtered_history)
 
                 response = get_llm().invoke(
