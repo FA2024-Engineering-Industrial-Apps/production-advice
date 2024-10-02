@@ -103,7 +103,7 @@ if __name__ == "__main__":
         response = {}
         with st.status("Thinking...") as status:
             # In this way the model would have to run algorithm again if the prioritization is requested
-            solutions_memory.clear()
+            # solutions_memory.clear()
 
             number_of_tries = 1
             while "output" not in response or re.search(r"<(tool|call|ing|_)+(|\/)>", response["output"]):
