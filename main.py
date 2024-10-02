@@ -180,7 +180,8 @@ if __name__ == "__main__":
                 elif i == (num_steps - 1) and tool_name in DEPLOYING_FUNCTIONS and \
                         "last_order" in st.session_state and st.session_state["last_order"]:
                     order = OrderDeployment(
-                        order=st.session_state["last_order"]
+                        order=st.session_state["last_order"],
+                        id=len(st.session_state.messages) + 1
                     )
                     st.session_state["last_order"] = None
             

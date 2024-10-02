@@ -63,6 +63,7 @@ EXPORTING_FUNCTIONS = [func.func.__name__ for func in [
 
 @dataclass
 class OrderDeployment:
+    id: int
     order: dict
 
 DEPLOYING_FUNCTIONS = [func.func.__name__ for func in [
@@ -112,7 +113,7 @@ class MessageButton:
         with c2:
             self.__show_csv_download_button(tabular_csv_name, id, "Download full CSV export", "overflow")
 
-    def __display_export_button(self, column: DeltaGenerator) -> int:
+    def __display_export_button(self, column: DeltaGenerator):
         """ Returns the ID of the export button. """
         export = self.export_button
         assert export is not None
@@ -130,20 +131,21 @@ class MessageButton:
             else:
                 self.__show_excel_download_button(excel_file_name, id, "Download Excel export", "normal")
 
-        return id
-
-    def __display_deploy_button(self, column: DeltaGenerator, id: int):
+    def __display_deploy_button(self, column: DeltaGenerator):
         order = self.deploy_button
         assert order is not None
-        if column.button("Send to edge", use_container_width=True, key=f"excel_button_{id}",):
+        if column.button("Send to edge", use_container_width=True, key=f"excel_button_{order.id}",):
             result_message = mqtt_connection.publish_user_data(order.order)
             st.toast(result_message)
     
     def display(self):
-        if (self.export_button is not None) and (self.deploy_button is not None):
-            _, c1, c2 = st.columns([3, 1, 1])
-            id = self.__display_export_button(c1)
-            self.__display_deploy_button(c2, id)
-        elif self.export_button is not None:
+        if (self.export_button is not None) != (self.deploy_button is not None):
             _, c1 = st.columns([3, 1])
+            if self.deploy_button is not None:
+                self.__display_deploy_button(c1)
+            else:
+                self.__display_export_button(c1)
+        elif (self.export_button is not None) and (self.deploy_button is not None):
+            _, c1, c2 = st.columns([3, 1, 1])
             self.__display_export_button(c1)
+            self.__display_deploy_button(c2)
