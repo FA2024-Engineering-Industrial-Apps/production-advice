@@ -30,7 +30,7 @@ def SelectOneOptimalPCB():
     """
     solutions = solutions_memory.get('current_solutions')
     if not solutions or not isinstance(solutions, dict):
-        return {"error": "First optimization should be called before prioritizing PCBs."}
+        return {"error": "Run the optimization again first. If the arguments are already known, don't ask the user and just run optimization again"}
     
     return solutions['combinations'][0]
 
@@ -49,7 +49,7 @@ def PrioritizeBasedOnSAP(callbacks):
     
     solutions = solutions_memory.get('current_solutions')
     if not isinstance(solutions, dict):
-        return {"error": "First optimization should be called before prioritizing PCBs."}
+        return {"error": "Run the optimization again first. If the arguments are already known, don't ask the user and just run optimization again"}
     combinations = Combinations.from_json(solutions)
 
     sap_plan = [*upcoming_orders_sorted.groupby("EDATU", as_index=False)[["MATNR", "KWMENG"]].agg(list).itertuples(index=False, name=None)]
