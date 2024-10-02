@@ -15,12 +15,10 @@ solutions_memory = {}
 @tool
 def CallOptimizer(ListOfPCBsNumbers):
     """
-    It is not an algorithm on its own, but a fallback function that should be called
-    if the user wants to optimize the grouping of PCBs for the production line without specifying the optimization type.
+    It is a fallback function that should be called if the user wants to optimize the grouping of PCBs for the production line without specifying the optimization type.
     It is not an algorithm, do NOT mention it to the user.
 
-    Args: 
-        - ListOfPCBsNumbers: this should either be a a list of PCBs or a single int for one PCBs. If a range of PCBs should be optimized, expand it as a list of consecutive integers (e.g., 1-5 -> [1, 2, 3, 4, 5]).
+    Argument (ListOfPCBsNumbers): should be a list of PCBs. If a range of PCBs should be optimized, expand it as a list of consecutive integers (1-5 -> [1, 2, 3, 4, 5]).
     """
     try:
         ListOfPCBsNumbers = sanitize_input(ListOfPCBsNumbers)
@@ -45,11 +43,10 @@ def CallOptimizer(ListOfPCBsNumbers):
 def CallSerialOptimizer(ListOfPCBsNumbers):
     """
     Function to optimize the grouping of PCBs for the production line in a serial manner. 
-    This function should only be called if the user asks for serial optimization.
+    It should only be called if the user asks for serial optimization.
     Better suited for less than 10 PCBs.
 
-    Args: 
-        - ListOfPCBsNumbers: this should either be a a list of PCBs or a single int for a range of PCBs.
+    Argument (ListOfPCBsNumbers): should be a list of PCBs
     """
     try:
         ListOfPCBsNumbers = sanitize_input(ListOfPCBsNumbers)
@@ -69,11 +66,10 @@ def CallSerialOptimizer(ListOfPCBsNumbers):
 def CallHybridOptimizer(ListOfPCBsNumbers):
     """
     Function to optimize the grouping of PCBs for the production line in a hybrid manner. 
-    This function should only be called if the user asks for hybrid optimization.
+    It should only be called if the user asks for hybrid optimization.
     Better suited for more than 10 PCBs.
 
-    Args: 
-        - ListOfPCBsNumbers: this should either be a a list of PCBs or a single int for a range of PCBs.
+    Argument (ListOfPCBsNumbers): should be a list of PCBs
     """
     try:
         ListOfPCBsNumbers = sanitize_input(ListOfPCBsNumbers)
@@ -93,11 +89,10 @@ def CallHybridOptimizer(ListOfPCBsNumbers):
 def CallParallelOptimizer(ListOfPCBsNumbers):
     """
     Function to optimize the grouping of PCBs for the production line in a parallel manner.
-    This function should only be called if the user asks for parallel optimization.
+    It should only be called if the user asks for parallel optimization.
     Is experimental and should be used with caution.
 
-    Args: 
-        - ListOfPCBsNumbers: this should either be a a list of PCBs or a single int for a range of PCBs. 
+    Argument (ListOfPCBsNumbers): should be a list of PCBs
     """
     try:
         ListOfPCBsNumbers = sanitize_input(ListOfPCBsNumbers)

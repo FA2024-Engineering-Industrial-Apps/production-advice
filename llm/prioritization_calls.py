@@ -25,10 +25,8 @@ current_date = dt.datetime.strptime("2024-10-03", "%Y-%m-%d")
 @tool
 def SelectOneOptimalPCB():
     """
-    Selects one of the optimal soltions.
-    
-    Returns:
-        - one optimal pcb combination.
+    Selects one of the optimal solutions.
+    Returns one optimal pcb combination
     """
     solutions = solutions_memory.get('current_solutions')
     if not solutions or not isinstance(solutions, dict):
@@ -40,12 +38,9 @@ def SelectOneOptimalPCB():
 @tool
 def PrioritizeBasedOnSAP(callbacks):
     """
-    Prioritize PCBs based on SAP data (VBAP table). Select PCBs with the closest delivery dates.
-    This function generates the PCB that should be prioritized and can be used as input for the FilterPCBs function.
-    Would also return the production plan for the prioritized PCBs.
+    Prioritize PCBs based on SAP data and selects PCBs with the closest delivery dates.
     
-    Returns:
-        - a list of tuples with PCBs grouped by their delivery date.
+    Returns a list of tuples with PCBs grouped by their delivery date and a production plan for the prioritized PCBs.
     """
     vbap_df = parse_tool_data(callbacks)["vbap_data"]
 
