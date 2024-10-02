@@ -6,6 +6,8 @@ import re
 import time
 import csv
 
+import pandas as pd
+
 
 # Function to generate CSV from given input and save with timestamped filename
 def create_csv_from_input(input_data):
@@ -35,6 +37,7 @@ def _combination_to_csv(json_data: dict, combination_id: int, writer) -> None:
             # TODO: also write materials
             writer.writerow([combination_id, group_id, pcb])
 
+
 def json_solution_to_tabular_csv(file_id: int, json_data: dict) -> str:
     path = os.path.abspath(os.path.join(
         __file__,
@@ -60,3 +63,15 @@ def json_solution_to_tabular_csv(file_id: int, json_data: dict) -> str:
             )
     
     return path
+
+
+PATH_TO_DEFAULT_VBAP_DATA = os.path.abspath(os.path.join(
+    __file__,
+    os.path.pardir,
+    os.path.pardir,
+    "SAP_Data/VBAP.csv"
+))
+def get_default_vbap_data() -> pd.DataFrame:
+    vbap_df = pd.read_csv(PATH_TO_DEFAULT_VBAP_DATA)
+    vbap_df["EDATU"] = pd.to_datetime(vbap_df["EDATU"])
+    return vbap_df

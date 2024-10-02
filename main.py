@@ -2,15 +2,23 @@ import streamlit as st
 import llm.setup as llmchat
 from llm.algorithm_calls import solutions_memory
 from utils.streamlit_utils import *
+from utils.csv_utils import get_default_vbap_data
 from ui.buttons import EXPORTING_FUNCTIONS, DEPLOYING_FUNCTIONS, MessageButton, DataExport, OrderDeployment
 
 import re
+import datetime as dt
+
+import pandas as pd
 
 
 if __name__ == "__main__":
     @st.cache_resource
     def get_llm():
         return llmchat.agent_executor
+
+    @st.cache_resource
+    def get_pcb_list():
+        return [f"PCB{i:03d}" for i in range(1, 51)]
 
     if "started" not in st.session_state:
         st.session_state["started"] = True
@@ -19,6 +27,7 @@ if __name__ == "__main__":
             # DataExport("./output/1.json") # For testing purposes
         ]
         st.session_state["id"] = get_session()
+        st.session_state["vbap_data"] = get_default_vbap_data()
 
     st.title("Hello Production!")
 
@@ -37,7 +46,50 @@ if __name__ == "__main__":
     
     @st.dialog("Edit SAP data", width="large")
     def edit_sap_data():
-        st.write("Edit SAP data here")
+        c1, c2, c3, c4 = st.columns(4)
+        pcb = c1.selectbox(
+            "PCB",
+            get_pcb_list(),
+            placeholder="Select PCB"
+        )
+        quantity = c2.number_input(
+            "Quantity",
+            min_value=1,
+            step=1,
+            value=1,
+            placeholder="Enter quantity"
+        )
+        delivery_date = c3.date_input(
+            "Delivery date",
+            value=dt.datetime.strptime("2024-10-03", "%Y-%m-%d"),
+            format="YYYY-MM-DD",
+        )
+        if c4.button("Add"):
+            df = st.session_state["vbap_data"]
+            df.loc[len(df)] = {
+                "MATNR": pcb,
+                "KWMENG": quantity,
+                "EDATU": pd.to_datetime(delivery_date),
+
+                "VBELN": 1000001001 + len(df.index),
+                "POSNR": 200
+            }
+            df = df.sort_values(by="EDATU", ignore_index=True)
+            st.session_state["vbap_data"] = df
+
+        st.write("Current SAP data:")
+        st.session_state["vbap_data"] = st.data_editor(
+            st.session_state["vbap_data"],
+            num_rows="dynamic",
+            column_config={
+                "EDATU": st.column_config.DateColumn(
+                    "EDATU",
+                    format="YYYY-MM-DD",
+                    step=1
+                ),
+            },
+            hide_index=True
+        )
 
     # Displaying side bar
     st.sidebar.title("Options")
@@ -74,9 +126,10 @@ if __name__ == "__main__":
                                 if not MessageButton.isinstance(msg)
                         ],
                     },
-                    config={
-                        "callbacks": [llmchat.OnToolCall(on_tool_call)]
-                    }
+                    config={"callbacks": [
+                        llmchat.OnToolCall(on_tool_call),
+                        llmchat.OnGetData({"vbap_data": st.session_state["vbap_data"]}),
+                    ]}
                 )
             status.update(label="Done")
 

@@ -11,6 +11,7 @@ from algorithms.objects import *
 from llm.prompt_utils import *
 from llm.algorithm_calls import solutions_memory
 from llm.prompt_utils import *
+from llm.get_data_callback import parse_tool_data
 
 TIME_PER_SETUP_CHANGE = 2 * 60 * 60
 TIME_PER_PCB = 10
@@ -19,8 +20,6 @@ SETUP_CHANGE = "SETUP_CHANGE"
 
 
 current_date = dt.datetime.strptime("2024-10-03", "%Y-%m-%d")
-
-path_to_vbap = "SAP_Data/VBAP.csv"
 
 
 @tool
@@ -39,7 +38,7 @@ def SelectOneOptimalPCB():
 
 
 @tool
-def PrioritizeBasedOnSAP():
+def PrioritizeBasedOnSAP(callbacks):
     """
     Prioritize PCBs based on SAP data (VBAP table). Select PCBs with the closest delivery dates.
     This function generates the PCB that should be prioritized and can be used as input for the FilterPCBs function.
@@ -48,8 +47,7 @@ def PrioritizeBasedOnSAP():
     Returns:
         - a list of tuples with PCBs grouped by their delivery date.
     """
-    vbap_df = pd.read_csv(path_to_vbap)
-    vbap_df["EDATU"] = pd.to_datetime(vbap_df["EDATU"])
+    vbap_df = parse_tool_data(callbacks)["vbap_data"]
 
     upcoming_orders = vbap_df[(vbap_df["EDATU"] > current_date) & (vbap_df["EDATU"] <= current_date + dt.timedelta(days=7))]
     upcoming_orders_sorted = upcoming_orders.sort_values(by="EDATU")
