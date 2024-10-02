@@ -118,13 +118,26 @@ if __name__ == "__main__":
                     st.write(f"Using {function_name}...")
                     st.markdown(f"\t`{function_arguments}`")
 
+                filtered_history = []
+                prev_msg = None
+                was_last_result = False
+                for msg in reversed(st.session_state.messages):
+                    if not MessageButton.isinstance(msg):
+                        if not MessageButton.isinstance(prev_msg):
+                            filtered_history.append(msg)
+                        elif not was_last_result:
+                            was_last_result = True
+                            filtered_history.append(msg)
+                        else:
+                            filtered_history.append(llmchat.SystemMessage("<llm correctly answered the previous question so it was excluded from the history>"))
+                    prev_msg = msg
+                filtered_history = list(reversed(filtered_history))
+                print(filtered_history)
+
                 response = get_llm().invoke(
                     {
                         "input": prompt,
-                        "chat_history": [
-                            msg for msg in st.session_state.messages
-                                if not MessageButton.isinstance(msg)
-                        ],
+                        "chat_history": filtered_history,
                     },
                     config={"callbacks": [
                         llmchat.OnToolCall(on_tool_call),
