@@ -4,7 +4,8 @@ sys.path.append(path.abspath(path.join(__file__, path.pardir, path.pardir)))
 from llm.algorithm_calls import *
 from llm.prioritization_calls import *
 from llm.prompt import *
-from utils.create_csv import create_csv_from_input
+from llm.get_data_callback import OnGetData
+from utils.csv_utils import create_csv_from_input
 
 from typing import Callable
 
