@@ -15,6 +15,8 @@ if __name__ == "__main__":
     MQTT_IP = params['MQTT_IP']
     TOPIC = params['TOPIC']
 
+    st.title("⚙️ Machine Emulator ⚙️")
+
     def on_message(client, userdata, message):
         data = json.loads(message.payload)
         with st.expander(f"Received data at {datetime.datetime.now().strftime('%H:%M:%S')}"):
